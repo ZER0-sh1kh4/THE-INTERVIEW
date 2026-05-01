@@ -1,0 +1,102 @@
+/* Admin Assessments — matches candidate dashboard theme (top navbar, no sidebar) */
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(26, 26, 26, 0.035) 1px, transparent 1px) 0 0 / 8.333% 100%,
+    var(--color-background);
+  color: var(--color-primary);
+}
+
+.admin-main {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 5rem 2rem 6rem;
+}
+
+/* ── Page Header ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 3rem 0 4rem;
+}
+.page-title {
+  margin: 0;
+  font-family: var(--font-editorial);
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 1.05;
+  font-style: italic;
+  font-weight: 400;
+}
+.page-desc {
+  font-family: var(--font-body); font-size: 0.875rem; line-height: 1.6;
+  color: rgba(26,26,26,0.48); margin-top: 1rem; max-width: 600px;
+}
+.header-label {
+  font-family: var(--font-body); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.48;
+  white-space: nowrap; margin-top: 2rem;
+}
+
+/* ── Filters ── */
+.filters-bar {
+  display: flex; align-items: flex-end; gap: 3rem; margin-bottom: 2rem;
+  border-bottom: 1px solid var(--color-outline); padding-bottom: 1rem; flex-wrap: wrap;
+}
+.filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.filter-group--bordered { border-left: 1px solid var(--color-outline); padding-left: 3rem; }
+.filter-label { font-family: var(--font-body); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(26,26,26,0.48); }
+.filter-select { font-family: var(--font-editorial); font-size: 1.1rem; background: transparent; border: none; padding: 0; cursor: pointer; color: var(--color-primary); min-width: 150px; }
+.filter-select:focus { outline: none; }
+.filter-spacer { flex: 1; }
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; text-align: left; border-collapse: collapse; font-family: var(--font-body); }
+.data-table th {
+  padding: 0 0.5rem 1.25rem;
+  border-bottom: 2px solid var(--color-primary);
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.data-table td {
+  padding: 1.5rem 0.5rem;
+  border-bottom: 1px solid var(--color-outline);
+  color: rgba(26, 26, 26, 0.72);
+  font-size: 0.875rem; vertical-align: middle;
+}
+.data-table tr:hover td { color: var(--color-primary); }
+
+.id-cell { opacity: 0.48; font-size: 0.75rem; font-weight: 500; }
+.user-id-cell { color: rgba(26,26,26,0.48); }
+.domain-cell { font-family: var(--font-editorial); font-size: 1rem; }
+.score-cell { font-family: var(--font-body); }
+.percent-cell { font-weight: 700; }
+.date-cell { opacity: 0.48; font-size: 0.8rem; }
+
+/* ── Grade Badges ── */
+.grade-badge {
+  display: inline-block; width: 2rem; height: 2rem; line-height: 2rem;
+  text-align: center; font-family: var(--font-body); font-size: 0.75rem; font-weight: 700;
+  border: 1px solid var(--color-primary);
+}
+.grade-badge--top { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.grade-badge--gold { background: var(--color-secondary); color: var(--color-primary); border-color: var(--color-secondary); font-weight: 900; }
+.grade-badge--fail { background: #ba1a1a; color: #fff; border-color: #ba1a1a; }
+
+/* ── Premium Indicator ── */
+.premium-indicator { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.premium-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-secondary); }
+.standard-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(26,26,26,0.48); }
+
+.loading-state, .error-state { font-family: var(--font-body); font-style: italic; padding: 4rem 0; text-align: center; color: rgba(26,26,26,0.48); }
+.error-state { color: #ba1a1a; }
+.no-data { font-family: var(--font-body); font-style: italic; color: rgba(26,26,26,0.48); padding: 2rem 0; text-align: center; }
+
+@media (max-width: 680px) {
+  .admin-main { padding: 3rem 1rem 4rem; }
+  .page-title { font-size: 2rem; }
+  .filters-bar { flex-direction: column; gap: 1rem; }
+  .filter-group--bordered { border-left: none; padding-left: 0; }
+}

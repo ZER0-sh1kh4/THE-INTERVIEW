@@ -1,0 +1,174 @@
+<!-- Profile page — editorial design, no internal IDs exposed. -->
+<ng-container *ngIf="currentUser$ | async as user">
+  <app-user-navbar></app-user-navbar>
+
+  <main class="profile-shell">
+    <div class="profile-layout">
+
+      <!-- Sidebar Navigation -->
+      <aside class="profile-sidebar">
+        <div class="sidebar-header">
+          <span class="label-caps muted">Executive Suite</span>
+          <strong class="label-caps">{{ getPlanLabel(user) }} Member</strong>
+        </div>
+        <nav class="sidebar-nav">
+          <a class="sidebar-link" [class.active]="activeSection === 'account'"
+             (click)="setSection('account')">
+            <span class="material-symbols-outlined">person</span>
+            <span class="label-caps">Account</span>
+          </a>
+
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <section class="profile-content">
+
+        <!-- Vertical Decorative Label -->
+        <div class="vertical-label-track">
+          <span class="vertical-label">Identity / Status / Access</span>
+        </div>
+
+        <!-- Account Section -->
+        <div class="content-body" *ngIf="activeSection === 'account'">
+
+          <!-- Hero Header -->
+          <header class="profile-hero">
+            <span class="label-caps text-gold">Member Profile</span>
+
+            <!-- Display Name: View or Edit mode -->
+            <ng-container *ngIf="!isEditingProfile; else editNameBlock">
+              <h1 class="font-editorial profile-name-row">
+                {{ getDisplayName(user) }}
+                <button type="button" class="edit-name-btn" title="Edit display name"
+                        (click)="startEdit()">
+                  <span class="material-symbols-outlined">edit</span>
+                </button>
+              </h1>
+            </ng-container>
+
+            <ng-template #editNameBlock>
+              <div class="edit-name-form">
+                <input type="text"
+                       [(ngModel)]="editName"
+                       class="editorial-input edit-name-input"
+                       placeholder="Enter display name"
+                       maxlength="100"
+                       autofocus />
+                <div class="edit-name-actions">
+                  <button type="button"
+                          class="save-btn label-caps"
+                          [disabled]="isSavingProfile"
+                          (click)="saveProfile()">
+                    <span class="material-symbols-outlined">check</span>
+                    {{ isSavingProfile ? 'Saving...' : 'Save' }}
+                  </button>
+                  <button type="button"
+                          class="cancel-btn label-caps"
+                          (click)="cancelEdit()">
+                    <span class="material-symbols-outlined">close</span>
+                    Cancel
+                  </button>
+                </div>
+                <div class="error-box" *ngIf="profileError">{{ profileError }}</div>
+              </div>
+            </ng-template>
+
+            <p class="hero-subtitle">
+              Refining the art of performance through data-driven insight and architectural precision in preparation.
+            </p>
+
+            <!-- Profile messages -->
+            <div class="info-box" *ngIf="profileMsg">{{ profileMsg }}</div>
+          </header>
+
+          <!-- Two-column Details -->
+          <section class="details-grid">
+
+            <!-- Left: Identity Details (no internal IDs) -->
+            <div class="identity-column">
+              <div class="detail-block">
+                <label class="label-caps muted">Electronic Mail</label>
+                <div class="detail-value email-link">{{ user.email }}</div>
+              </div>
+              <div class="detail-block">
+                <label class="label-caps muted">Assigned Role</label>
+                <div class="detail-value role-row">
+                  <span class="material-symbols-outlined text-gold">verified</span>
+                  <span>{{ getRoleLabel(user) }}</span>
+                </div>
+              </div>
+
+              <!-- Stats -->
+              <div class="stats-block">
+                <div class="stat-row">
+                  <span class="label-caps muted">Sessions Completed</span>
+                  <span class="stat-value font-editorial">{{ sessionsCompleted }}</span>
+                </div>
+                <div class="stat-row">
+                  <span class="label-caps muted">Total Interviews</span>
+                  <span class="stat-value font-editorial">{{ totalInterviews }}</span>
+                </div>
+                <div class="stat-row">
+                  <span class="label-caps muted">Total Assessments</span>
+                  <span class="stat-value font-editorial">{{ totalAssessments }}</span>
+                </div>
+                <div class="stat-row">
+                  <span class="label-caps muted">In Progress</span>
+                  <span class="stat-value font-editorial text-gold">{{ inProgressCount }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Membership & Avatar -->
+            <div class="membership-column">
+
+              <!-- Membership Card -->
+              <div class="membership-card">
+                <label class="label-caps muted">Membership Status</label>
+                <div class="membership-body">
+                  <div>
+                    <div class="membership-tier font-editorial">{{ getPlanLabel(user) }}</div>
+                    <div class="membership-since">Active member</div>
+                  </div>
+                  <div class="membership-accent"></div>
+                </div>
+              </div>
+
+              <!-- Avatar Block -->
+              <div class="avatar-block">
+                <div class="avatar-circle">
+                  <span class="avatar-initials font-editorial">{{ getInitials(user) }}</span>
+                </div>
+                <div class="avatar-meta">
+                  <span class="label-caps muted">Visual Identity</span>
+                  <p class="font-editorial avatar-hint">Generated from your initials.</p>
+                </div>
+              </div>
+
+              <!-- Upgrade CTA -->
+              <button type="button" class="upgrade-btn label-caps gold-hover-slide"
+                      *ngIf="!isPremium(user)"
+                      (click)="navigateToPremium()">
+                <span>Upgrade to Premium</span>
+                <span class="material-symbols-outlined">workspace_premium</span>
+              </button>
+
+              <!-- Refresh Profile -->
+              <div class="refresh-block">
+                <button type="button" class="refresh-btn label-caps gold-hover-slide"
+                        (click)="refreshProfile()">
+                  <span>Refresh Profile</span>
+                  <span class="material-symbols-outlined">refresh</span>
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+
+
+      </section>
+    </div>
+  </main>
+</ng-container>

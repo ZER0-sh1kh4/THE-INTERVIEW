@@ -1,0 +1,116 @@
+<!-- Interview history page adapted from the supplied archive UI and aligned to the app theme. -->
+<div class="history-grid-line line-1"></div>
+<div class="history-grid-line line-2"></div>
+<div class="history-grid-line line-3"></div>
+<div class="history-grid-line line-4"></div>
+<div class="history-grid-line line-5"></div>
+
+<app-user-navbar></app-user-navbar>
+
+<main class="history-shell">
+  <aside class="history-side">
+    <span class="side-kicker label-caps">Session Archive</span>
+    <div class="metric-block">
+      <span class="label-caps">Mastery Score</span>
+      <strong class="font-editorial">{{ averageScore }}</strong>
+      <small>Average completed result</small>
+    </div>
+    <div class="metric-block">
+      <span class="label-caps">Activity</span>
+      <strong class="font-editorial">{{ isLoading && !interviews.length ? '...' : completedCount }}</strong>
+      <small>Sessions completed</small>
+    </div>
+    <div class="metric-block">
+      <span class="label-caps">In Progress</span>
+      <strong class="font-editorial">{{ isLoading && !interviews.length ? '...' : inProgressCount }}</strong>
+      <small>Sessions available</small>
+    </div>
+    <blockquote>
+      <span class="material-symbols-outlined">auto_awesome</span>
+      <p class="font-editorial">Preparation creates precision in thought.</p>
+    </blockquote>
+  </aside>
+
+  <section class="history-content">
+    <div class="history-hero">
+      <div>
+        <span class="label-caps text-gold">Interview History</span>
+        <h1 class="font-editorial">My Interviews <i>Archive</i></h1>
+      </div>
+      <div class="total-pill label-caps">{{ totalCount }} Total Sessions</div>
+    </div>
+
+    <div class="error-box" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+    <section class="filter-bar" aria-label="History filters">
+      <div class="status-filter">
+        <span class="label-caps">Status</span>
+        <button
+          type="button"
+          *ngFor="let status of statusOptions"
+          [class.active]="selectedStatus === status"
+          (click)="setStatus(status)"
+        >
+          {{ status }}
+        </button>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <button type="button" class="ghost-button label-caps" routerLink="/assessments/history">
+          <span class="material-symbols-outlined">quiz</span>
+          Assessment History
+        </button>
+        <button type="button" class="ghost-button label-caps" (click)="loadHistory()">
+          <span class="material-symbols-outlined">refresh</span>
+          Refresh
+        </button>
+      </div>
+    </section>
+
+
+    <section class="history-table">
+      <div class="loading-state label-caps" *ngIf="isLoading && !interviews.length">
+        Searching your interview archive...
+      </div>
+
+      <table *ngIf="visibleRows.length">
+        <thead>
+          <tr>
+            <th>Session Title</th>
+            <th>Domain</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Grade</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of visibleRows">
+            <td>
+              <strong class="font-editorial">{{ row.title }}</strong>
+              <span class="label-caps">{{ row.type }}</span>
+            </td>
+            <td>{{ row.domain }}</td>
+            <td>
+              <span class="status-pill" [class.completed]="row.status.toLowerCase() === 'completed'" [class.pending]="row.status.toLowerCase() === 'pending'">
+                {{ row.status }}
+              </span>
+            </td>
+            <td>{{ row.date }}</td>
+            <td>
+              <span class="grade-text">{{ row.percentage !== null ? (row.percentage | number:'1.0-0') + '%' : row.grade }}</span>
+            </td>
+            <td>
+              <a class="action-link label-caps" [routerLink]="row.actionLink">{{ row.actionLabel }}</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="empty-history" *ngIf="!isLoading && !visibleRows.length">
+        <h2 class="font-editorial">No interviews found.</h2>
+        <p>Start a new interview session and it will appear in this archive.</p>
+        <button type="button" class="dark-button label-caps" (click)="startNewInterview()">Start New Interview</button>
+      </div>
+    </section>
+  </section>
+</main>

@@ -1,0 +1,31 @@
+<header class="dashboard-nav" *ngIf="currentUser$ | async as user">
+  <div class="brand-block">
+    <div class="brand-mark">
+      <span class="material-symbols-outlined">mic_external_on</span>
+    </div>
+    <span class="brand-name font-editorial">THE INTERVIEW</span>
+  </div>
+
+  <nav class="dashboard-links" aria-label="Candidate dashboard navigation">
+    <a routerLink="/user-dashboard" routerLinkActive="active">Dashboard</a>
+    <a routerLink="/interviews/history" routerLinkActive="active">History</a>
+    <a routerLink="/assessments/domain" routerLinkActive="active">Assessments</a>
+    <a routerLink="/interviews/start" routerLinkActive="active">Interview</a>
+    <a routerLink="/premium" routerLinkActive="active">Subscription</a>
+    <a routerLink="/profile" routerLinkActive="active">Profile</a>
+  </nav>
+
+  <div class="account-block">
+    <span class="plan-pill" [class.premium-active]="user.isPremium === true">
+      <span class="material-symbols-outlined">workspace_premium</span>
+      {{ getPlanLabel(user) }}
+    </span>
+    <a *ngIf="user.isPremium !== true" routerLink="/premium" class="upgrade-cta label-caps">Upgrade</a>
+    <a *ngIf="user.role === 'Admin'" routerLink="/admin" class="admin-cta label-caps">Admin Panel</a>
+    <div class="account-name">
+      <span class="label-caps">{{ user.role === 'Admin' ? 'Admin' : 'Candidate' }}</span>
+      <strong>{{ getDisplayName(user) }}</strong>
+    </div>
+    <button type="button" class="logout-btn label-caps" (click)="logout()">Logout</button>
+  </div>
+</header>

@@ -1,0 +1,47 @@
+<!-- Assessment Domain page adapted from stitch and existing app theme. -->
+<app-user-navbar></app-user-navbar>
+
+<aside class="side-label">ARCHITECTURAL PRECISION — ELITE PREP</aside>
+
+<main class="setup-shell">
+  <header class="setup-header">
+    <span class="label-caps text-gold">Module Selection</span>
+    <h1 class="font-editorial">Select Your <br /><i>Specialization</i></h1>
+    <div class="header-rule"></div>
+  </header>
+
+  <section class="cards-grid">
+    <div class="domain-card" *ngFor="let domain of domains; let i = index" (click)="selectDomain(domain.name)">
+      <div>
+        <div class="card-top">
+          <span class="label-caps">0{{ i + 1 }}</span>
+          <span class="material-symbols-outlined card-icon">{{ domain.icon }}</span>
+        </div>
+        <h3 class="font-editorial">{{ domain.name }}</h3>
+        <p class="desc">{{ domain.desc }}</p>
+      </div>
+      <div class="card-action">
+        <span class="label-caps">CHOOSE DOMAIN</span>
+        <div class="underline-expand"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote-section">
+    <div class="quote-text">
+      <p class="font-editorial">"Preparation is the silent architecture of victory."</p>
+      <div class="quote-label">
+        <div class="line"></div>
+        <span class="label-caps">THE INTERVIEW METHODOLOGY</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="setup-footer">
+  <span class="label-caps">&#169; 2026 THE INTERVIEW - ALL RIGHTS RESERVED</span>
+  <div>
+    <a>Privacy</a>
+    <a>System Status</a>
+  </div>
+</footer>

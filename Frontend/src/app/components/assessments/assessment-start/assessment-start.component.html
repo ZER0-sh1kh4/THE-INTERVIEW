@@ -1,0 +1,103 @@
+<!-- Assessment Start config page adapted from configure_assessment and existing theme -->
+<app-user-navbar></app-user-navbar>
+
+<aside class="side-label">SESSION CONFIGURATION - 2026.V1</aside>
+
+<main class="setup-shell">
+  <header class="setup-header">
+    <span class="label-caps text-gold">Step 02 / Setup</span>
+    <h1 class="font-editorial">Define the <br /><i>Parameters</i></h1>
+    <div class="header-rule"></div>
+  </header>
+
+  <form class="setup-form" #assessmentForm="ngForm" (ngSubmit)="startAssessment()">
+    <div class="field field-wide">
+      <label class="label-caps">Selected Domain</label>
+      <input
+        name="domain"
+        [(ngModel)]="form.domain"
+        required
+        type="text"
+        readonly
+        class="editorial-input"
+        style="color: rgba(26,26,26,0.6);"
+      />
+    </div>
+
+    <section class="field field-wide">
+      <label class="label-caps">Focus Subtopics (Optional)</label>
+      <div class="chip-row">
+        <button
+          type="button"
+          class="skill-chip selected"
+          *ngFor="let topic of subtopics"
+          (click)="removeSubtopic(topic)"
+        >
+          {{ topic }} &times;
+        </button>
+      </div>
+      <div class="custom-skill">
+        <input
+          name="subtopicsInput"
+          [(ngModel)]="subtopicsInput"
+          type="text"
+          placeholder="Add topic (e.g. async/await)"
+          (keyup.enter)="addSubtopic()"
+        />
+        <button type="button" class="add-chip label-caps" (click)="addSubtopic()">
+          <span class="material-symbols-outlined">add</span>
+          Add Topic
+        </button>
+      </div>
+    </section>
+
+    <section class="field field-wide split-row">
+      <div>
+        <label class="label-caps">Difficulty Level</label>
+        <div class="segment-row">
+          <button
+            type="button"
+            *ngFor="let level of difficulties"
+            [class.selected]="form.difficulty === level"
+            (click)="form.difficulty = level; onConfigChange()"
+          >
+            {{ level }}
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="label-caps">No. of Questions</label>
+        <div class="select-wrap">
+          <select name="questionCount" [(ngModel)]="form.questionCount" (ngModelChange)="onConfigChange()">
+            <option *ngFor="let count of questionCounts" [ngValue]="count">{{ count }} Questions</option>
+          </select>
+          <span class="material-symbols-outlined">expand_more</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="info-box" *ngIf="infoMsg">{{ infoMsg }}</div>
+    <div class="error-box" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+    <div class="action-row field-wide">
+      <button type="submit" class="start-button label-caps" [disabled]="isLoading || assessmentForm.invalid">
+        <span>{{ isLoading ? 'Initializing...' : 'Start Assessment' }}</span>
+        <span class="material-symbols-outlined" [class.spin]="isLoading">refresh</span>
+      </button>
+      <p class="estimate label-caps">Estimated Duration: {{ form.questionCount * 2 }} Minutes</p>
+      <p class="warmup-status label-caps" *ngIf="warmUpStatus">
+        <span *ngIf="warmUpStatus === 'warming'" class="text-gold">⚡ Pre-generating questions...</span>
+        <span *ngIf="warmUpStatus === 'ready'" style="color: #4caf50;">✓ Questions ready</span>
+      </p>
+    </div>
+  </form>
+</main>
+
+<footer class="setup-footer">
+  <span class="label-caps">&#169; 2026 THE INTERVIEW - ALL RIGHTS RESERVED</span>
+  <div>
+    <a>Privacy</a>
+    <a>System Status</a>
+  </div>
+</footer>

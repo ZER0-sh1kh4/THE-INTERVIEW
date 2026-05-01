@@ -1,0 +1,109 @@
+<app-admin-navbar></app-admin-navbar>
+
+<main class="admin-main">
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1 class="page-title">System Overview</h1>
+    <div class="header-line"></div>
+    <span class="header-label">ADMINISTRATION</span>
+  </header>
+
+  <!-- Loading / Error -->
+  <div *ngIf="isLoading" class="loading-state">
+    <p>Loading dashboard data...</p>
+  </div>
+  <div *ngIf="error" class="error-state">
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <section *ngIf="!isLoading && !error" class="stats-grid">
+    <div class="stat-card" routerLink="/admin/users">
+      <span class="stat-label">TOTAL USERS</span>
+      <div class="stat-bottom">
+        <h2 class="stat-value">{{ totalUsers | number }}</h2>
+        <p class="stat-sub">Registered accounts</p>
+      </div>
+    </div>
+    <div class="stat-card" routerLink="/admin/interviews">
+      <span class="stat-label">TOTAL INTERVIEWS</span>
+      <div class="stat-bottom">
+        <h2 class="stat-value">{{ totalInterviews | number }}</h2>
+        <p class="stat-sub">Completed sessions</p>
+      </div>
+    </div>
+    <div class="stat-card" routerLink="/admin/assessments">
+      <span class="stat-label">TOTAL ASSESSMENTS</span>
+      <div class="stat-bottom">
+        <h2 class="stat-value">{{ totalAssessments | number }}</h2>
+        <p class="stat-sub">AI evaluations</p>
+      </div>
+    </div>
+    <div class="stat-card stat-card--highlight">
+      <span class="stat-label">ACTIVE SUBSCRIPTIONS</span>
+      <div class="stat-bottom">
+        <h2 class="stat-value stat-value--gold">{{ activeSubscriptions | number }}</h2>
+        <p class="stat-sub">Premium Members</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Grid -->
+  <div *ngIf="!isLoading && !error" class="content-grid">
+    <!-- Recent Payments -->
+    <aside class="payments-column">
+      <h3 class="section-title">Financial Flow</h3>
+      <div class="payment-list">
+        <div *ngFor="let payment of recentPayments" class="payment-item">
+          <div class="payment-top">
+            <p class="payment-user">User #{{ payment.userId }}</p>
+            <span class="payment-amount">₹{{ payment.amount }}</span>
+          </div>
+          <div class="payment-bottom">
+            <p class="payment-date">{{ payment.createdAt | date:'MMM dd, HH:mm' }}</p>
+            <span class="status-pill" [class]="'status-pill--' + payment.status.toLowerCase()">{{ payment.status }}</span>
+          </div>
+        </div>
+        <p *ngIf="recentPayments.length === 0" class="no-data">No payment records found.</p>
+      </div>
+    </aside>
+
+    <!-- Recent Users Table -->
+    <section class="users-column">
+      <div class="section-header">
+        <h3 class="section-title">User Directory</h3>
+        <a routerLink="/admin/users" class="view-all-link">VIEW FULL REGISTRY</a>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IDENTITY</th>
+              <th>ROLE</th>
+              <th>STATUS</th>
+              <th>REGISTERED</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of recentUsers">
+              <td>
+                <div class="user-cell">
+                  <span class="user-name">{{ user.fullName || user.email }}</span>
+                  <span class="user-email">{{ user.email }}</span>
+                </div>
+              </td>
+              <td class="role-cell">{{ user.role }}</td>
+              <td>
+                <span class="status-pill" [class.status-pill--active]="user.isPremium" [class.status-pill--pending]="!user.isPremium">
+                  {{ user.isPremium ? 'PREMIUM' : 'FREE' }}
+                </span>
+              </td>
+              <td class="date-cell">{{ user.createdAt | date:'MMM dd, yyyy' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p *ngIf="recentUsers.length === 0" class="no-data">No users found.</p>
+      </div>
+    </section>
+  </div>
+</main>

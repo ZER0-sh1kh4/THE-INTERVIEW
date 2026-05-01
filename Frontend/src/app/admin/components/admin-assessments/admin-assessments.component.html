@@ -1,0 +1,76 @@
+<app-admin-navbar></app-admin-navbar>
+
+<main class="admin-main">
+  <header class="page-header">
+    <span class="header-label">ADMINISTRATION</span>
+    <h1 class="page-title">Assessment Ledger</h1>
+    <p class="page-desc">A comprehensive historical record of all candidate performance across technical and behavioral domains.</p>
+  </header>
+
+  <!-- Filters (Stitch style) -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <label class="filter-label">FILTER BY DOMAIN</label>
+      <select class="filter-select" [(ngModel)]="domainFilter" (change)="applyFilters()">
+        <option value="">ALL DOMAINS</option>
+        <option *ngFor="let d of domains" [value]="d">{{ d | uppercase }}</option>
+      </select>
+    </div>
+    <div class="filter-group filter-group--bordered">
+      <label class="filter-label">FILTER BY GRADE</label>
+      <select class="filter-select" [(ngModel)]="gradeFilter" (change)="applyFilters()">
+        <option value="">ALL GRADES</option>
+        <option value="A">GRADE A</option>
+        <option value="B">GRADE B</option>
+        <option value="C">GRADE C</option>
+        <option value="F">FAIL</option>
+      </select>
+    </div>
+    <div class="filter-spacer"></div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">Loading assessment ledger...</div>
+  <div *ngIf="error" class="error-state">{{ error }}</div>
+
+  <div *ngIf="!isLoading && !error" class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Assessment ID</th>
+          <th>User ID</th>
+          <th>Domain</th>
+          <th style="text-align:right">Score</th>
+          <th style="text-align:right">%</th>
+          <th style="text-align:center">Grade</th>
+          <th>Status</th>
+          <th style="text-align:right">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredAssessments">
+          <td class="id-cell">#AS-{{ item.id }}</td>
+          <td class="user-id-cell">USR-{{ item.userId }}</td>
+          <td class="domain-cell">{{ item.domain }}</td>
+          <td style="text-align:right" class="score-cell">{{ item.score }} / {{ item.maxScore }}</td>
+          <td style="text-align:right" class="percent-cell">{{ item.percentage | number:'1.0-0' }}%</td>
+          <td style="text-align:center">
+            <span class="grade-badge"
+              [class.grade-badge--top]="item.grade === 'A' || item.grade === 'A+'"
+              [class.grade-badge--fail]="item.grade === 'F'"
+              [class.grade-badge--gold]="item.percentage >= 90">
+              {{ item.grade }}
+            </span>
+          </td>
+          <td>
+            <div class="premium-indicator" *ngIf="item.isPremiumResult">
+              <span class="premium-dot"></span> Premium
+            </div>
+            <span *ngIf="!item.isPremiumResult" class="standard-label">Standard</span>
+          </td>
+          <td style="text-align:right" class="date-cell">{{ item.createdAt | date:'MMM dd, yyyy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="filteredAssessments.length === 0" class="no-data">No assessments found matching your filters.</p>
+  </div>
+</main>

@@ -1,0 +1,22 @@
+# =========================
+# OS Generated Files
+# =========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =========================
+# IDE
+# =========================
+.vs/
+.vscode/
+.idea/
+
+# =========================
+# Excluded Project Folders
+# =========================
+UI_Stitch/
+**/All Docs/
+docs/
+Backend/ANGULAR_FRONTEND_CONTEXT.md
+Backend/ANGULAR_FRONTEND_CONTEXT.pdf

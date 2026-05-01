@@ -1,0 +1,373 @@
+/* Purpose: Styles the interview setup page to match the supplied editorial UI. */
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(26, 26, 26, 0.035) 1px, transparent 1px) 0 0 / 8.333% 100%,
+    var(--color-background);
+  color: var(--color-primary);
+}
+
+.setup-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  margin: 0;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.18);
+  background: #f2f0ea;
+  text-transform: uppercase;
+}
+
+.brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nav-links,
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.nav-links a,
+.nav-actions button,
+.setup-footer a {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.nav-links a {
+  color: rgba(26, 26, 26, 0.58);
+}
+
+.nav-links .active {
+  color: #1a1a1a;
+  border-bottom: 2px solid #1a1a1a;
+  padding-bottom: 0.35rem;
+}
+
+.nav-start {
+  padding: 0.8rem 1.25rem;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.side-label {
+  position: fixed;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  color: rgba(26, 26, 26, 0.2);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  z-index: 1;
+}
+
+.setup-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 5rem 2rem 6rem;
+}
+
+.setup-header,
+.setup-form {
+  width: 100%;
+}
+
+.setup-header {
+  margin-bottom: 5rem;
+}
+
+.text-gold {
+  color: var(--color-secondary);
+}
+
+.setup-header h1 {
+  margin: 1rem 0 2rem;
+  font-size: clamp(4rem, 8vw, 6.5rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.header-rule {
+  height: 1px;
+  background: rgba(26, 26, 26, 0.1);
+}
+
+.setup-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4rem 3rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+.field label:first-child {
+  color: rgba(26, 26, 26, 0.6);
+}
+
+.editorial-input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.3);
+  padding: 1rem 0;
+  background: transparent;
+  font-family: var(--font-editorial);
+  font-size: 2rem;
+  outline: none;
+}
+
+.editorial-input:focus,
+.custom-skill input:focus,
+.select-wrap select:focus {
+  border-color: var(--color-secondary);
+}
+
+.choice-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.choice-row input {
+  display: none;
+}
+
+.choice-box {
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid rgba(26, 26, 26, 0.35);
+}
+
+.choice-row input:checked + .choice-box {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+
+.type-card {
+  min-height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid rgba(26, 26, 26, 0.18);
+  font-size: 1.05rem;
+}
+
+.type-card.selected {
+  border: 2px solid var(--color-secondary);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.type-card.selected .material-symbols-outlined,
+.skill-chip.selected {
+  color: var(--color-secondary);
+}
+
+.chip-row,
+.segment-row,
+.custom-skill {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.skill-chip,
+.add-chip {
+  padding: 0.7rem 1.25rem;
+  border: 1px solid rgba(26, 26, 26, 0.12);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.skill-chip.selected {
+  border-color: var(--color-secondary);
+  background: rgba(212, 175, 55, 0.12);
+}
+
+.custom-skill {
+  margin-top: 0.5rem;
+}
+
+.custom-skill input {
+  min-width: 220px;
+  border: 0;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.22);
+  background: transparent;
+  padding: 0.75rem 0;
+  outline: none;
+}
+
+.add-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-style: dashed;
+  color: rgba(26, 26, 26, 0.55);
+}
+
+.add-chip .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.split-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.segment-row button {
+  flex: 1;
+  padding: 0.9rem;
+  border: 1px solid rgba(26, 26, 26, 0.12);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.segment-row button.selected {
+  border: 2px solid #1a1a1a;
+}
+
+.select-wrap {
+  position: relative;
+}
+
+.select-wrap select {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.3);
+  padding: 0.9rem 2rem 0.9rem 0;
+  background: transparent;
+  appearance: none;
+  outline: none;
+  font-size: 1.05rem;
+}
+
+.select-wrap span {
+  position: absolute;
+  right: 0;
+  bottom: 0.9rem;
+  pointer-events: none;
+  color: rgba(26, 26, 26, 0.4);
+}
+
+.error-box,
+.info-box {
+  grid-column: 1 / -1;
+  padding: 1rem;
+  border: 1px solid;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+
+.error-box {
+  border-color: rgba(186, 26, 26, 0.35);
+  color: #ba1a1a;
+  background: rgba(186, 26, 26, 0.05);
+}
+
+.info-box {
+  border-color: rgba(212, 175, 55, 0.35);
+  color: var(--color-secondary);
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.action-row {
+  align-items: center;
+  text-align: center;
+}
+
+.start-button {
+  min-width: min(320px, 100%);
+  padding: 1.5rem 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--color-primary);
+  color: var(--color-background);
+  letter-spacing: 0.28em;
+}
+
+.start-button:disabled,
+.nav-start:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.estimate {
+  margin-top: 1.5rem;
+  color: rgba(26, 26, 26, 0.4);
+}
+
+.setup-footer {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.1);
+  color: rgba(26, 26, 26, 0.45);
+}
+
+.setup-footer div {
+  display: flex;
+  gap: 2rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .setup-nav,
+  .setup-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .side-label {
+    display: none;
+  }
+
+  .setup-form,
+  .split-row {
+    grid-template-columns: 1fr;
+  }
+}

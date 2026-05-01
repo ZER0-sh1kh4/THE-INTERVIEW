@@ -1,0 +1,91 @@
+<app-admin-navbar></app-admin-navbar>
+
+<main class="admin-main">
+  <header class="page-header">
+    <span class="header-label">RECORDS / MANAGEMENT</span>
+    <h1 class="page-title">Interview Archive</h1>
+    <div class="header-line"></div>
+  </header>
+
+  <!-- Filters (Stitch style) -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <label class="filter-label">FILTER BY STATUS</label>
+      <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="">ALL SESSIONS</option>
+        <option value="Completed">COMPLETED</option>
+        <option value="InProgress">IN PROGRESS</option>
+        <option value="Scheduled">SCHEDULED</option>
+      </select>
+    </div>
+    <div class="filter-group filter-group--bordered">
+      <label class="filter-label">INTERVIEW TYPE</label>
+      <select class="filter-select" [(ngModel)]="typeFilter" (change)="applyFilters()">
+        <option value="">ALL MODALITIES</option>
+        <option value="Technical">TECHNICAL</option>
+        <option value="Behavioral">BEHAVIORAL (HR)</option>
+        <option value="Mixed">MIXED METHOD</option>
+      </select>
+    </div>
+    <div class="filter-spacer"></div>
+    <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="SEARCH ARCHIVE..." class="search-input" />
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">Loading interview archive...</div>
+  <div *ngIf="error" class="error-state">{{ error }}</div>
+
+  <div *ngIf="!isLoading && !error" class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>REF. ID</th>
+          <th>USER</th>
+          <th>TITLE</th>
+          <th>DOMAIN</th>
+          <th>TYPE</th>
+          <th>STATUS</th>
+          <th>TIMESTAMP</th>
+          <th style="text-align:right">ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredInterviews">
+          <td class="id-cell">#INT-{{ item.id }}</td>
+          <td class="name-cell">User #{{ item.userId }}</td>
+          <td>{{ item.title || 'Interview Session' }}</td>
+          <td class="domain-cell">{{ item.domain }}</td>
+          <td>{{ item.type || 'Technical' }}</td>
+          <td>
+            <span class="status-indicator">
+              <span class="status-dot" [class.dot--completed]="item.status === 'Completed'" [class.dot--progress]="item.status === 'InProgress'" [class.dot--flagged]="item.status === 'Flagged'"></span>
+              {{ item.status }}
+            </span>
+          </td>
+          <td class="date-cell">{{ item.createdAt | date:'MMM dd, yyyy — HH:mm' | uppercase }}</td>
+          <td style="text-align:right">
+            <button class="btn-review" (click)="viewDetails(item)">REVIEW</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="filteredInterviews.length === 0" class="no-data">No interviews found matching your filters.</p>
+  </div>
+</main>
+
+<!-- Detail Modal -->
+<div *ngIf="selectedInterview" class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">Interview #{{ selectedInterview.id }}</h2>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="detail-label">USER ID</span><span class="detail-value">{{ selectedInterview.userId }}</span></div>
+      <div class="detail-item"><span class="detail-label">DOMAIN</span><span class="detail-value">{{ selectedInterview.domain }}</span></div>
+      <div class="detail-item"><span class="detail-label">TYPE</span><span class="detail-value">{{ selectedInterview.type }}</span></div>
+      <div class="detail-item"><span class="detail-label">STATUS</span><span class="detail-value">{{ selectedInterview.status }}</span></div>
+      <div class="detail-item"><span class="detail-label">TITLE</span><span class="detail-value">{{ selectedInterview.title || 'N/A' }}</span></div>
+      <div class="detail-item"><span class="detail-label">DATE</span><span class="detail-value">{{ selectedInterview.createdAt | date:'medium' }}</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="closeModal()">Close</button>
+    </div>
+  </div>
+</div>

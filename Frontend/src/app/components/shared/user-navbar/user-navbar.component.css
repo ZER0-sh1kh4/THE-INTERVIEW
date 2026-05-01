@@ -1,0 +1,157 @@
+/* Fixed top navigation with brand, simple page links, user plan, and logout. */
+.dashboard-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--color-outline);
+  background: rgba(249, 248, 246, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+.brand-block,
+.account-block,
+.dashboard-links,
+.plan-pill {
+  display: flex;
+  align-items: center;
+}
+
+.brand-block {
+  gap: 1rem;
+  min-width: max-content;
+}
+
+.brand-mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  background: var(--color-primary);
+  color: var(--color-background);
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.dashboard-links {
+  gap: 2rem;
+}
+
+.dashboard-links a {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.48);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.dashboard-links .active {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 0.35rem;
+}
+
+.account-block {
+  gap: 1rem;
+}
+
+.plan-pill {
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.14);
+  color: #735c00;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.plan-pill .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.account-name {
+  display: grid;
+  gap: 0.25rem;
+  text-align: right;
+}
+
+.account-name strong {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.logout-btn {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.plan-pill.premium-active {
+  border-color: #d4af37;
+  background: rgba(212, 175, 55, 0.22);
+  color: #d4af37;
+  font-weight: 600;
+}
+
+.upgrade-cta {
+  padding: 0.5rem 1rem;
+  background: #d4af37;
+  color: #1a1a1a;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.upgrade-cta:hover {
+  background: #c4a030;
+}
+
+.admin-cta {
+  padding: 0.5rem 1rem;
+  background: #1a1a1a;
+  color: #f2f2f2;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.admin-cta:hover {
+  background: #d4af37;
+  color: #1a1a1a;
+}
+
+@media (max-width: 1080px) {
+  .dashboard-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-links {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .account-block {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboard-nav {
+    padding: 1rem;
+  }
+}

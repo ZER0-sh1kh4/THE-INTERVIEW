@@ -1,0 +1,346 @@
+/* Purpose: Styles the authenticated candidate dashboard while preserving the provided UI's editorial look. */
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(26, 26, 26, 0.035) 1px, transparent 1px) 0 0 / 8.333% 100%,
+    var(--color-background);
+  color: var(--color-primary);
+}
+
+/* Fixed top navigation with brand, simple page links, user plan, and logout. */
+.dashboard-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--color-outline);
+  background: rgba(249, 248, 246, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+.brand-block,
+.account-block,
+.dashboard-links,
+.plan-pill {
+  display: flex;
+  align-items: center;
+}
+
+.brand-block {
+  gap: 1rem;
+  min-width: max-content;
+}
+
+.brand-mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  background: var(--color-primary);
+  color: var(--color-background);
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.dashboard-links {
+  gap: 2rem;
+}
+
+.dashboard-links a {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.48);
+}
+
+.dashboard-links .active {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 0.35rem;
+}
+
+.account-block {
+  gap: 1rem;
+}
+
+.plan-pill {
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.14);
+  color: #735c00;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.plan-pill .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.account-name {
+  display: grid;
+  gap: 0.25rem;
+  text-align: right;
+}
+
+.account-name strong {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.logout-btn {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-primary);
+}
+
+/* Main dashboard layout. */
+.dashboard-shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 5rem 2rem 6rem;
+}
+
+.welcome-section {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 3rem 0 4rem;
+}
+
+.welcome-section h1 {
+  margin: 0;
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 1.05;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: capitalize;
+}
+
+.welcome-section p {
+  max-width: 48rem;
+  margin: 1.5rem 0 0;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--color-outline);
+  color: rgba(26, 26, 26, 0.68);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.status-badge {
+  flex: 0 0 auto;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-primary);
+}
+
+/* Metrics strip from the reference dashboard, simplified for current backend data. */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid rgba(26, 26, 26, 0.18);
+  border-bottom: 1px solid rgba(26, 26, 26, 0.18);
+}
+
+.stat-card {
+  min-height: 11rem;
+  padding: 2.5rem;
+  border-right: 1px solid var(--color-outline);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.stat-card:last-child {
+  border-right: 0;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.stat-card strong {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1;
+  text-transform: capitalize;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 3rem 0;
+  border-bottom: 1px solid var(--color-outline);
+}
+
+.primary-action,
+.secondary-action {
+  min-height: 4.25rem;
+  padding: 0 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--color-primary);
+}
+
+.primary-action {
+  background: var(--color-primary);
+  color: var(--color-background);
+}
+
+.secondary-action {
+  background: transparent;
+}
+
+.muted-action {
+  color: rgba(26, 26, 26, 0.48);
+  border-color: rgba(26, 26, 26, 0.2);
+}
+
+/* Recent activity tables intentionally use empty-state data until later pages are wired. */
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4rem;
+  padding-top: 4rem;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.panel-heading h2 {
+  margin: 0;
+  font-size: 2.25rem;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.text-link {
+  border-bottom: 1px solid rgba(26, 26, 26, 0.24);
+  padding-bottom: 0.35rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th {
+  padding: 0 0 1.25rem;
+  border-bottom: 2px solid var(--color-primary);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+td {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--color-outline);
+  color: rgba(26, 26, 26, 0.72);
+}
+
+.row-link {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.row-link:hover,
+.row-pill-link:hover {
+  text-decoration: underline;
+}
+
+th:last-child,
+td:last-child {
+  text-align: right;
+}
+
+.row-pill {
+  display: inline-block;
+  padding: 0.25rem 0.55rem;
+  background: rgba(212, 175, 55, 0.14);
+  color: #735c00;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.row-pill-link {
+  text-decoration: none;
+}
+
+.grade-cell {
+  font-family: var(--font-editorial);
+  font-size: 1.5rem;
+  font-style: italic;
+  color: var(--color-primary);
+}
+
+@media (max-width: 1080px) {
+  .dashboard-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-links {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .account-block {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .activity-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboard-shell {
+    padding: 3rem 1rem 4rem;
+  }
+
+  .dashboard-nav {
+    padding: 1rem;
+  }
+
+  .welcome-section {
+    flex-direction: column;
+    padding-top: 2rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-outline);
+  }
+
+  .quick-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}

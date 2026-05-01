@@ -1,0 +1,126 @@
+<!-- Visible Gridlines for Architectural Precision -->
+<div class="grid-line" style="left: 8.333%"></div>
+<div class="grid-line" style="left: 16.666%"></div>
+<div class="grid-line" style="left: 25%"></div>
+<div class="grid-line" style="left: 33.333%"></div>
+<div class="grid-line" style="left: 41.666%"></div>
+<div class="grid-line" style="left: 50%"></div>
+<div class="grid-line" style="left: 58.333%"></div>
+<div class="grid-line" style="left: 66.666%"></div>
+<div class="grid-line" style="left: 75%"></div>
+<div class="grid-line" style="left: 83.333%"></div>
+<div class="grid-line" style="left: 91.666%"></div>
+
+<!-- Vertical Label (Left) -->
+<div class="vertical-label-container hidden-md-down">
+  <span class="vertical-label opacity-40 uppercase">AUTHENTICATION / 01</span>
+</div>
+
+<!-- Header Logo -->
+<header class="header">
+  <div class="font-editorial header-title text-primary">THE INTERVIEW</div>
+  <div class="label-caps opacity-40">THE INTERVIEW</div>
+</header>
+
+<main class="main-container">
+  <div class="login-grid">
+    <!-- Left Side: Login Form -->
+    <div class="login-form-wrapper">
+      <h1 class="headline-lg text-primary mb-12">
+        Welcome <i class="italic font-light">Back</i>
+      </h1>
+
+      <!-- Error Alert -->
+      <div class="error-alert" *ngIf="errorMsg">
+        <p class="text-error uppercase">{{ errorMsg }}</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label class="label-caps opacity-60" for="email">Email Address</label>
+          <input 
+            id="email" 
+            type="email" 
+            formControlName="email"
+            class="form-input font-editorial italic text-primary" 
+            placeholder="your.name@professional.com" 
+          />
+        </div>
+
+        <div class="form-group">
+          <div class="form-group-header">
+            <label class="label-caps opacity-60" for="password">Security Key</label>
+            <a routerLink="/reset-password" class="label-caps opacity-40 hover-opacity-100">
+              FORGOT PASSWORD?
+            </a>
+          </div>
+          <div class="relative">
+            <input 
+              id="password" 
+              [type]="showPassword ? 'text' : 'password'" 
+              formControlName="password"
+              class="form-input font-editorial italic text-primary pr-10" 
+              placeholder="••••••••••••" 
+            />
+            <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+              <span class="material-symbols-outlined text-primary opacity-40 hover-opacity-100">
+                {{ showPassword ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            type="submit" 
+            [disabled]="isLoading || loginForm.invalid"
+            class="btn-submit gold-hover-slide label-caps"
+            [class.is-loading]="isLoading"
+          >
+            <span class="btn-text">LOGIN</span>
+            <div class="loading-spinner" *ngIf="isLoading"></div>
+          </button>
+          
+          <div class="form-links">
+            <a routerLink="/register" class="register-link label-caps opacity-60 hover-opacity-100">
+              DON'T HAVE AN ACCOUNT? <span class="text-primary font-bold">REGISTER</span>
+              <span class="link-underline"></span>
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Right Side: Editorial Image -->
+    <div class="login-image-wrapper hidden-md-down">
+      <div class="image-container border-primary-10">
+        <img alt="Luxury corporate office" class="image-transition" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnuYKPNgjqpUeF_cjDpKHynuIhekjX7UWe7dodgLQEYuUSfItpZnOGFtt4RfMzM9BJDAuGogXK_V4kJ45fMewxi2OekABON7aPQ9Kymiz8xdHKLwsWsIeaSyK2nl--P19Hiw5w0ap89HGrol5WU-s7sKaqDWl2Y2qCP3EbgaR8IToZOGmRseCHK0WgHQysNkOMlPdOctejfiWW_ZXqw6VY-Q9wV6OXxdXmmtrVWHRGNrBs1lL6gT9-Xo72NO0rYk66-vH46gyhRP9z" />
+      </div>
+      
+      <!-- Floating Info Block -->
+      <div class="floating-info hidden-lg-down shadow-sm">
+        <p class="label-caps opacity-60">
+          "Prestige preparation is not about the answers you give, but the clarity with which you present your vision."
+        </p>
+        <div class="floating-info-footer">
+          <div class="divider-small"></div>
+          <span class="label-caps opacity-40">EDITION 04 / 2024</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer-minimal border-top-primary-10">
+  <div class="footer-minimal-container">
+    <div class="font-editorial footer-brand">THE INTERVIEW</div>
+    <div class="footer-minimal-links label-caps">
+      <a href="#">PRIVACY</a>
+      <a href="#">TERMS</a>
+      <a href="#">CONTACT</a>
+    </div>
+    <div class="label-caps opacity-40">
+      © 2024 THE INTERVIEW. ALL RIGHTS RESERVED.
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,84 @@
+# =========================
+# .NET / C# Build Outputs
+# =========================
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+# =========================
+# Visual Studio
+# =========================
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+[Tt]est[Rr]esult*/
+
+# =========================
+# NuGet
+# =========================
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# =========================
+# Sensitive Configuration
+# =========================
+**/appsettings.json
+**/appsettings.Development.json
+**/appsettings.Production.json
+# Keep Example files tracked
+!**/appsettings.Example.json
+
+# =========================
+# .NET Tool & Cache
+# =========================
+.dotnet/
+*.mdf
+*.ldf
+*.ndf
+
+# =========================
+# OS Generated Files
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# Log files
+# =========================
+*.log
+*.err.log
+*.run.log
+
+# =========================
+# IDE
+# =========================
+.idea/
+*.swp
+*.swo
+*~
+
+# =========================
+# User-specific launch profiles
+# =========================
+*.slnLaunch.user
+launchSettings.json
+
+# =========================
+# Docs (optional - remove if you want to track docs)
+# =========================
+# All Docs/

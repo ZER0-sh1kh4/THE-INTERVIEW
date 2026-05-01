@@ -1,0 +1,93 @@
+<!-- Assessment Session adapted to match editorial theme while keeping map and timer -->
+<div class="session-layout">
+  <!-- Sidebar Map -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="label-caps">THE INTERVIEW</span>
+    </div>
+
+    <div class="timer-section">
+      <span class="material-symbols-outlined icon">timer</span>
+      <div class="time">{{ timerMinutes | number:'2.0' }}:{{ timerSeconds | number:'2.0' }}</div>
+      <div class="label-caps time-label">REMAINING</div>
+    </div>
+
+    <div class="map-section">
+      <div class="label-caps map-title">QUESTION MAP</div>
+      <div class="map-grid">
+        <button
+          *ngFor="let q of questions; let i = index"
+          class="map-btn"
+          [class.active]="i === currentIndex"
+          [class.answered]="answers[q.id]"
+          (click)="goToQuestion(i)"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="submit-btn label-caps" (click)="submitAssessment()" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'SUBMITTING...' : 'SUBMIT ASSESSMENT' }}
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Question Area -->
+  <main class="question-area" *ngIf="currentQuestion">
+    <header class="q-header">
+      <span class="label-caps text-gold">QUESTION {{ currentIndex + 1 }} OF {{ questions.length }}</span>
+      <div class="header-rule"></div>
+    </header>
+
+    <div class="q-content">
+      <h2 class="font-editorial q-text">{{ currentQuestion.text }}</h2>
+
+      <div class="options-list">
+        <div class="option-card" [class.selected]="answers[currentQuestion.id] === 'A'" (click)="selectOption('A')">
+          <span class="opt-letter">A</span>
+          <span class="opt-text">{{ currentQuestion.optionA }}</span>
+        </div>
+        <div class="option-card" [class.selected]="answers[currentQuestion.id] === 'B'" (click)="selectOption('B')">
+          <span class="opt-letter">B</span>
+          <span class="opt-text">{{ currentQuestion.optionB }}</span>
+        </div>
+        <div class="option-card" [class.selected]="answers[currentQuestion.id] === 'C'" (click)="selectOption('C')">
+          <span class="opt-letter">C</span>
+          <span class="opt-text">{{ currentQuestion.optionC }}</span>
+        </div>
+        <div class="option-card" [class.selected]="answers[currentQuestion.id] === 'D'" (click)="selectOption('D')">
+          <span class="opt-letter">D</span>
+          <span class="opt-text">{{ currentQuestion.optionD }}</span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="q-nav">
+      <button class="nav-btn label-caps" [disabled]="currentIndex === 0" (click)="prevQuestion()">
+        <span class="material-symbols-outlined">arrow_back</span>
+        PREVIOUS
+      </button>
+      <button class="nav-btn label-caps" *ngIf="currentIndex < questions.length - 1" (click)="nextQuestion()">
+        NEXT
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
+      <button class="nav-btn submit-btn-inline label-caps" *ngIf="currentIndex === questions.length - 1" (click)="submitAssessment()" [disabled]="isSubmitting">
+        FINISH
+      </button>
+    </footer>
+  </main>
+</div>
+
+<!-- Warning Modal -->
+<div class="modal-overlay" *ngIf="showWarningModal">
+  <div class="warning-modal">
+    <span class="material-symbols-outlined warning-icon">warning</span>
+    <h3 class="font-editorial">Integrity Violation</h3>
+    <p>{{ warningMessage }}</p>
+    <button class="warning-btn label-caps" *ngIf="warnings < maxWarnings" (click)="dismissWarning()">
+      I UNDERSTAND
+    </button>
+  </div>
+</div>

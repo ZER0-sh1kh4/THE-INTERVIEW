@@ -1,0 +1,134 @@
+<!-- Gridlines for Aesthetic Precision -->
+<div class="visible-grid-line" style="left: 8.33%;"></div>
+<div class="visible-grid-line" style="left: 25%;"></div>
+<div class="visible-grid-line" style="left: 50%;"></div>
+<div class="visible-grid-line" style="left: 75%;"></div>
+<div class="visible-grid-line" style="left: 91.66%;"></div>
+
+<!-- Navigation Shell -->
+<header class="header-nav">
+  <div class="header-nav-container">
+    <div class="font-editorial header-logo">THE INTERVIEW</div>
+    <nav class="hidden-md-down header-links">
+      <a class="label-caps" href="#">INTERVIEW</a>
+      <a class="label-caps" href="#">ANALYSIS</a>
+      <a class="label-caps" href="#">ARCHIVE</a>
+      <button class="label-caps btn-outline gold-hover-slide">GET STARTED</button>
+    </nav>
+  </div>
+</header>
+
+<!-- Side Vertical Navigation -->
+<aside class="side-nav">
+  <div class="side-nav-content">
+    <div class="vertical-label side-link">ARCHIVE</div>
+    <div class="vertical-label side-link">SETTINGS</div>
+    <div class="vertical-label side-active">REGISTRATION / VOL. 01</div>
+  </div>
+</aside>
+
+<main class="main-container">
+  <div class="main-grid">
+    <!-- Hero & Form Content Area -->
+    <div class="form-content-area">
+      <div class="hero-section">
+        <div class="hero-divider"></div>
+        <h1 class="display-xl text-primary mb-6">
+          Join the <span class="italic font-light">Elite</span>
+        </h1>
+        <p class="body-lg opacity-60 hero-desc">
+          Step into a refined space of intellectual growth and professional mastery. Your journey to the executive table starts here.
+        </p>
+      </div>
+
+      <!-- Error Alert -->
+      <div class="error-alert" *ngIf="errorMsg">
+        <p class="text-error uppercase">{{ errorMsg }}</p>
+      </div>
+
+      <!-- Registration Form -->
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+        <div class="form-group">
+          <label class="label-caps uppercase form-label">FULL NAME</label>
+          <input formControlName="fullName" type="text" class="form-input body-lg" placeholder="Johnathan Doe" />
+        </div>
+
+        <div class="form-group">
+          <label class="label-caps uppercase form-label">EMAIL ADDRESS</label>
+          <input formControlName="email" type="email" class="form-input body-lg" placeholder="j.doe@executive.com" />
+        </div>
+
+        <div class="form-group">
+          <label class="label-caps uppercase form-label">PASSWORD</label>
+          <input formControlName="password" type="password" class="form-input body-lg" placeholder="••••••••••••" />
+        </div>
+
+        <div class="form-group">
+          <label class="label-caps uppercase form-label">CONFIRM PASSWORD</label>
+          <input formControlName="confirmPassword" type="password" class="form-input body-lg" placeholder="••••••••••••" />
+          <div *ngIf="registerForm.errors?.['mismatch'] && registerForm.get('confirmPassword')?.touched" class="text-error label-caps mt-2">Passwords do not match</div>
+        </div>
+
+        <div class="terms-group">
+          <div class="checkbox-container">
+            <input formControlName="terms" id="terms" type="checkbox" class="checkbox-input" />
+            <span class="material-symbols-outlined checkbox-icon">check</span>
+          </div>
+          <label for="terms" class="terms-label">
+            I AGREE TO THE <a href="#" class="terms-link">TERMS OF SERVICE</a> AND <a href="#" class="terms-link">PRIVACY POLICY</a>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="registerForm.invalid || isLoading" class="btn-submit gold-hover-slide">
+            {{ isLoading ? 'CREATING...' : 'CREATE ACCOUNT' }}
+          </button>
+          <div>
+            <a routerLink="/login" class="login-link label-caps uppercase">
+              ALREADY HAVE AN ACCOUNT? LOGIN
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Asymmetric Decorative Column -->
+    <div class="decorative-column hidden-lg-down">
+      <div class="decorative-content">
+        <div class="decorative-header">
+          <div class="decorative-header-line"></div>
+        </div>
+        
+        <div class="decorative-quote-wrapper">
+          <p class="font-editorial decorative-quote italic">
+            "Success is not final; failure is not fatal: it is the courage to continue that counts."
+          </p>
+          <p class="decorative-quote-author label-caps">CHURCHILL / ARCHIVE 01</p>
+        </div>
+        
+        <div class="decorative-footer">
+          <div class="decorative-footer-inner"></div>
+          <div class="decorative-badge">
+            <span class="material-symbols-outlined icon-premium text-secondary">workspace_premium</span>
+            <p class="badge-text uppercase">The Signature Experience</p>
+          </div>
+          <div class="vertical-label badge-side uppercase">EST. MMXXIV</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer-register border-top-primary-10">
+  <div class="footer-container">
+    <div class="font-editorial footer-brand tracking-tight">THE INTERVIEW</div>
+    <div class="footer-links">
+      <a href="#" class="label-caps uppercase opacity-40 hover-opacity-100">PRIVACY</a>
+      <a href="#" class="label-caps uppercase opacity-40 hover-opacity-100">TERMS</a>
+      <a href="#" class="label-caps uppercase opacity-40 hover-opacity-100">CONTACT</a>
+    </div>
+    <div class="footer-copyright label-caps uppercase opacity-30">
+      © 2024 THE INTERVIEW. MANIFESTO FOR THE MODERN PROFESSIONAL.
+    </div>
+  </div>
+</footer>

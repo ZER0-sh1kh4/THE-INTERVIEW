@@ -1,0 +1,230 @@
+<app-user-navbar></app-user-navbar>
+
+<main class="premium-shell">
+  <!-- Hero Header -->
+  <header class="hero-section">
+    <div class="hero-copy">
+      <span class="vertical-tag">Membership</span>
+      <h1 class="font-editorial">Architectural <i>precision</i> for the modern <i>professional</i>.</h1>
+      <p>
+        Choose the membership level that matches your interview momentum. Premium opens unlimited mock interviews,
+        deeper AI review, and a cleaner path from practice to placement.
+      </p>
+    </div>
+    <div class="hero-aside">
+      <span>Established MMXXIV</span>
+    </div>
+  </header>
+
+  <!-- Upgrade Alert -->
+  <section class="upgrade-alert" *ngIf="highlightReason">
+    <span class="label-caps">Upgrade Recommended</span>
+    <p>{{ highlightReason }}</p>
+  </section>
+
+  <!-- ─── Current Subscription Section ─── -->
+  <section class="subscription-status" *ngIf="!subscriptionLoading">
+
+    <!-- Active Premium Subscription -->
+    <div class="current-sub-card" *ngIf="currentSubscription">
+      <div class="sub-header">
+        <div class="sub-header-left">
+          <span class="label-caps gold">Active Subscription</span>
+          <h2 class="font-editorial">Premium Access</h2>
+        </div>
+        <div class="sub-status-badge active">
+          <span class="status-dot"></span>
+          <span class="label-caps">Active</span>
+        </div>
+      </div>
+
+      <div class="sub-details-grid">
+        <div class="sub-detail">
+          <span class="label-caps muted">Plan</span>
+          <strong>{{ currentSubscription.plan }}</strong>
+        </div>
+        <div class="sub-detail">
+          <span class="label-caps muted">Start Date</span>
+          <strong>{{ formatDate(currentSubscription.startDate) }}</strong>
+        </div>
+        <div class="sub-detail">
+          <span class="label-caps muted">End Date</span>
+          <strong>{{ formatDate(currentSubscription.endDate) }}</strong>
+        </div>
+        <div class="sub-detail">
+          <span class="label-caps muted">Price</span>
+          <strong class="font-editorial">₹{{ currentSubscription.price }}</strong>
+        </div>
+      </div>
+
+      <div class="sub-actions">
+        <button type="button" class="cancel-link label-caps" (click)="promptCancel()">
+          Cancel Subscription
+        </button>
+      </div>
+    </div>
+
+    <!-- Free Plan Indicator -->
+    <div class="current-sub-card free-card" *ngIf="!currentSubscription && !isPremiumUser">
+      <div class="sub-header">
+        <div class="sub-header-left">
+          <span class="label-caps muted">Current Plan</span>
+          <h2 class="font-editorial">Free Tier</h2>
+        </div>
+        <div class="sub-status-badge free">
+          <span class="label-caps">Free</span>
+        </div>
+      </div>
+      <p class="free-desc">You're on the free plan with limited assessments and interviews. Upgrade to unlock the full experience.</p>
+    </div>
+  </section>
+
+  <div class="loading-indicator label-caps" *ngIf="subscriptionLoading">
+    Loading subscription status...
+  </div>
+
+  <!-- ─── Pricing Plans Grid ─── -->
+  <section class="plans-grid">
+    <article class="plan-card">
+      <span class="label-caps muted">01 / Entry</span>
+      <h2 class="font-editorial">Free Tier</h2>
+      <p class="plan-subtitle">Essential Access</p>
+      <ul>
+        <li><span class="material-symbols-outlined">check</span> 2 specialized assessments</li>
+        <li><span class="material-symbols-outlined">check</span> 1 mock interview session</li>
+        <li class="disabled"><span class="material-symbols-outlined">close</span> Premium AI analysis</li>
+        <li class="disabled"><span class="material-symbols-outlined">close</span> Detailed performance feedback</li>
+        <li class="disabled"><span class="material-symbols-outlined">close</span> Extended analytics</li>
+        <li class="disabled"><span class="material-symbols-outlined">close</span> Priority support</li>
+      </ul>
+      <button type="button" class="plan-button secondary" (click)="goBack()">Back To Dashboard</button>
+    </article>
+
+    <article class="plan-card featured">
+      <div class="plan-head">
+        <span class="label-caps gold">02 / Premium</span>
+        <span class="best-value label-caps">Recommended</span>
+      </div>
+      <h2 class="font-editorial">Premium Tier</h2>
+      <div class="price-row">
+        <strong class="font-editorial">Rs 499</strong>
+        <span class="label-caps">/ Month</span>
+      </div>
+      <p class="plan-subtitle">Unlimited refinement</p>
+      <ul>
+        <li><span class="material-symbols-outlined gold-icon">check</span> Unlimited AI-generated questions</li>
+        <li><span class="material-symbols-outlined gold-icon">check</span> Detailed feedback & analysis</li>
+        <li><span class="material-symbols-outlined gold-icon">check</span> Extended performance analytics</li>
+        <li><span class="material-symbols-outlined gold-icon">check</span> Unlimited assessments & interviews</li>
+        <li><span class="material-symbols-outlined gold-icon">check</span> Priority support</li>
+      </ul>
+
+      <div class="upgrade-error" *ngIf="upgradeError">
+        <span class="material-symbols-outlined">error</span>
+        {{ upgradeError }}
+      </div>
+
+      <button
+        type="button"
+        class="plan-button gold"
+        [disabled]="isUpgrading || isPremiumUser"
+        (click)="upgradeToPremium()"
+      >
+        <span *ngIf="isUpgrading" class="spinner"></span>
+        {{ isPremiumUser ? 'Already Premium' : (isUpgrading ? 'Redirecting...' : 'Upgrade to Premium') }}
+      </button>
+    </article>
+  </section>
+
+  <!-- ─── Quote Section ─── -->
+  <section class="quote-section">
+    <span class="material-symbols-outlined">format_quote</span>
+    <p class="font-editorial">The difference between prepared and perfected is the depth of your analysis.</p>
+  </section>
+
+  <!-- ─── Feature Grid ─── -->
+  <section class="feature-grid">
+    <article>
+      <h3 class="label-caps">AI-Generated Questions</h3>
+      <p>Every session features unique, AI-crafted questions tailored to your domain and skill level.</p>
+    </article>
+    <article>
+      <h3 class="label-caps">Detailed Feedback</h3>
+      <p>Receive comprehensive breakdowns of your responses with strengths, weaknesses, and improvement suggestions.</p>
+    </article>
+    <article>
+      <h3 class="label-caps">Extended Analytics</h3>
+      <p>Track your progress over time with detailed performance metrics and growth trajectory visualizations.</p>
+    </article>
+  </section>
+
+  <!-- ─── Payment History ─── -->
+  <section class="payment-history" *ngIf="!paymentsLoading && payments.length > 0">
+    <div class="section-header">
+      <h2 class="font-editorial">Invoice History</h2>
+      <div class="header-rule"></div>
+    </div>
+
+    <table class="payments-table">
+      <thead>
+        <tr>
+          <th class="label-caps">Date</th>
+          <th class="label-caps">Amount</th>
+          <th class="label-caps">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let payment of payments">
+          <td>{{ formatDate(payment.createdAt) }}</td>
+          <td>₹{{ payment.amount }}</td>
+          <td>
+            <span class="status-pill" [ngClass]="getStatusClass(payment.status)">
+              {{ payment.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="loading-indicator label-caps" *ngIf="paymentsLoading">
+    Loading payment history...
+  </div>
+</main>
+
+<!-- ─── Cancel Confirmation Dialog ─── -->
+<div class="cancel-overlay" *ngIf="showCancelDialog" (click)="dismissCancel()">
+  <div class="cancel-dialog" (click)="$event.stopPropagation()">
+    <span class="material-symbols-outlined dialog-icon">warning</span>
+    <h3 class="font-editorial">Cancel Subscription?</h3>
+    <p>Your premium access will remain active until the end of the current billing period. After that, you'll be downgraded to the Free tier.</p>
+
+    <div class="cancel-error" *ngIf="cancelError">
+      <span class="material-symbols-outlined">error</span>
+      {{ cancelError }}
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="plan-button secondary" (click)="dismissCancel()" [disabled]="isCancelling">
+        Keep Subscription
+      </button>
+      <button type="button" class="plan-button danger" (click)="confirmCancel()" [disabled]="isCancelling">
+        <span *ngIf="isCancelling" class="spinner"></span>
+        {{ isCancelling ? 'Cancelling...' : 'Confirm Cancel' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="premium-footer">
+  <div>
+    <strong class="font-editorial">THE INTERVIEW</strong>
+    <p class="label-caps">2026 The Interview. Architectural precision in preparation.</p>
+  </div>
+  <div class="footer-links">
+    <a>Terms</a>
+    <a>Privacy</a>
+    <a>Contact</a>
+  </div>
+</footer>

@@ -1,0 +1,102 @@
+<app-admin-navbar></app-admin-navbar>
+
+<main class="admin-main">
+  <header class="page-header">
+    <span class="header-label">SYSTEM MANAGEMENT / DIRECTORY</span>
+    <h1 class="page-title">User Directory</h1>
+    <div class="header-line"></div>
+  </header>
+
+  <!-- Search Bar (Stitch filter style) -->
+  <div class="search-bar">
+    <div class="search-wrap">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" [(ngModel)]="searchTerm" (input)="filterUsers()" placeholder="Search by name, email or identification..." class="search-input" />
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">Loading user directory...</div>
+  <div *ngIf="error" class="error-state">{{ error }}</div>
+
+  <div *ngIf="!isLoading && !error" class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Premium</th>
+          <th>Status</th>
+          <th>Created At</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+          <td class="id-cell">#USR-{{ user.id }}</td>
+          <td class="name-cell">{{ user.fullName || 'N/A' }}</td>
+          <td class="email-cell">{{ user.email }}</td>
+          <td>
+            <select class="role-select" [value]="user.role" (change)="onRoleChange(user, $event)">
+              <option value="User">CANDIDATE</option>
+              <option value="Admin">ADMIN</option>
+            </select>
+          </td>
+          <td>
+            <div class="premium-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" [checked]="user.isPremium" (click)="onPremiumToggle(user, $event)" />
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-text" [class.toggle-text--yes]="user.isPremium" [class.toggle-text--no]="!user.isPremium">
+                {{ user.isPremium ? 'YES' : 'NO' }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="status-dot">
+              <span class="dot" [class.dot--active]="user.isActive !== false" [class.dot--inactive]="user.isActive === false"></span>
+              {{ user.isActive !== false ? 'ACTIVE' : 'DORMANT' }}
+            </span>
+          </td>
+          <td class="date-cell">{{ user.createdAt | date:'MMM dd, yyyy' | uppercase }}</td>
+          <td class="actions-cell">
+            <button *ngIf="user.isActive !== false" class="btn-deactivate" (click)="promptDelete(user)">Deactivate</button>
+            <button *ngIf="user.isActive === false" class="btn-reactivate" (click)="onReactivate(user)">Reactivate</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="filteredUsers.length === 0" class="no-data">No users found matching your search.</p>
+  </div>
+
+  <!-- Footer Summary -->
+  <div *ngIf="!isLoading && !error" class="table-footer">
+    <div class="footer-stats">
+      <div class="footer-stat">
+        <span class="footer-stat-label">TOTAL DATABASE</span>
+        <span class="footer-stat-value">{{ users.length | number }}</span>
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-stat">
+        <span class="footer-stat-label">PREMIUM TIERS</span>
+        <span class="footer-stat-value footer-stat-value--gold">{{ premiumCount | number }}</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteDialog" class="modal-backdrop" (click)="cancelDelete()">
+  <div class="modal-content modal-content--danger" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">Confirm Deactivation</h2>
+    <p class="modal-body">Are you sure you want to deactivate <strong>{{ deleteTarget?.fullName || deleteTarget?.email }}</strong>?</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="cancelDelete()">Cancel</button>
+      <button class="btn-danger" (click)="confirmDelete()" [disabled]="isDeleting">
+        {{ isDeleting ? 'Processing...' : 'Deactivate User' }}
+      </button>
+    </div>
+  </div>
+</div>

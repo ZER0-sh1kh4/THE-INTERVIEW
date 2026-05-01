@@ -1,0 +1,30 @@
+<!-- Top Navigation — same layout as candidate user-navbar -->
+<header class="dashboard-nav" *ngIf="currentUser$ | async as user">
+  <div class="brand-block">
+    <div class="brand-mark">
+      <span class="material-symbols-outlined">mic_external_on</span>
+    </div>
+    <span class="brand-name font-editorial">THE INTERVIEW</span>
+  </div>
+
+  <nav class="dashboard-links" aria-label="Admin dashboard navigation">
+    <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
+    <a routerLink="/admin/users" routerLinkActive="active">Users</a>
+    <a routerLink="/admin/interviews" routerLinkActive="active">Interviews</a>
+    <a routerLink="/admin/assessments" routerLinkActive="active">Assessments</a>
+    <a routerLink="/admin/questions" routerLinkActive="active">Question Bank</a>
+  </nav>
+
+  <div class="account-block">
+    <span class="admin-pill">
+      <span class="material-symbols-outlined">shield_person</span>
+      ADMIN
+    </span>
+    <a routerLink="/user-dashboard" class="back-cta label-caps">Back to App</a>
+    <div class="account-name">
+      <span class="label-caps">Admin</span>
+      <strong>{{ getDisplayName(user) }}</strong>
+    </div>
+    <button type="button" class="logout-btn label-caps" (click)="logout()">Logout</button>
+  </div>
+</header>

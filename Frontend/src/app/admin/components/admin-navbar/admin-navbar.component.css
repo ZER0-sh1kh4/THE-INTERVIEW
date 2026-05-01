@@ -1,0 +1,145 @@
+/* ═══════════════════════════════════════════════════════════
+   Admin Top Navbar — mirrors candidate user-navbar exactly
+   Same sticky top bar, same fonts, same spacing
+   ═══════════════════════════════════════════════════════════ */
+
+.dashboard-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--color-outline);
+  background: rgba(249, 248, 246, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+.brand-block,
+.account-block,
+.dashboard-links,
+.admin-pill {
+  display: flex;
+  align-items: center;
+}
+
+.brand-block {
+  gap: 1rem;
+  min-width: max-content;
+}
+
+.brand-mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  background: var(--color-primary);
+  color: var(--color-background);
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Nav links — identical to candidate dashboard-links */
+.dashboard-links {
+  gap: 2rem;
+}
+
+.dashboard-links a {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.48);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.dashboard-links .active {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 0.35rem;
+}
+
+/* Account block — matches candidate */
+.account-block {
+  gap: 1rem;
+}
+
+.admin-pill {
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-background);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.admin-pill .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.back-cta {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.back-cta:hover {
+  background: var(--color-primary);
+  color: var(--color-background);
+}
+
+.account-name {
+  display: grid;
+  gap: 0.25rem;
+  text-align: right;
+}
+
+.account-name strong {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.logout-btn {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (max-width: 1080px) {
+  .dashboard-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-links {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .account-block {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboard-nav {
+    padding: 1rem;
+  }
+}

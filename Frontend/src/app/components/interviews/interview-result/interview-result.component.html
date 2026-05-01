@@ -1,0 +1,171 @@
+<!-- Interview result page with separate free and premium states from the supplied UI references. -->
+<div class="grid-line line-1"></div>
+<div class="grid-line line-2"></div>
+<div class="grid-line line-3"></div>
+<div class="grid-line line-4"></div>
+<div class="grid-line line-5"></div>
+<div class="grid-line line-6"></div>
+
+<nav class="result-nav">
+  <div class="brand font-editorial">THE INTERVIEW</div>
+  <div class="nav-links">
+    <a routerLink="/user-dashboard">Dashboard</a>
+    <a class="active">Sessions</a>
+    <a routerLink="/premium">Premium</a>
+  </div>
+  <div class="nav-actions">
+    <button type="button" class="ghost-button label-caps" (click)="viewDashboard()">View Dashboard</button>
+    <button type="button" class="dark-button label-caps" (click)="startNewInterview()">Start New Interview</button>
+  </div>
+</nav>
+
+<main class="result-shell" *ngIf="!isLoading; else loadingState">
+  <div class="error-box" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <ng-container *ngIf="result as interviewResult">
+    <section class="hero-grid">
+      <div class="side-label">{{ isPremiumResult ? 'EXECUTIVE SUMMARY' : 'SESSION RESULT' }} - ID_{{ interviewId }}</div>
+
+      <div class="hero-copy">
+        <h1 class="font-editorial">{{ resultTitle }}</h1>
+        <p>
+          Your interview simulation has been evaluated from the answers you submitted. This screen is populated from the
+          live backend result for this exact session.
+        </p>
+        <div class="total-line">
+          <span class="label-caps">Total Score</span>
+          <strong class="font-editorial">{{ interviewResult.totalScore }}<small>/{{ interviewResult.maxScore }}</small></strong>
+        </div>
+      </div>
+
+      <div class="score-gauge">
+        <div class="gauge-ring">
+          <svg viewBox="0 0 220 220" aria-hidden="true">
+            <circle class="track" cx="110" cy="110" r="96"></circle>
+            <circle class="fill" cx="110" cy="110" r="96" [style.stroke-dashoffset]="dashOffset"></circle>
+          </svg>
+          <div class="gauge-copy">
+            <strong class="font-editorial">{{ interviewResult.percentage | number:'1.0-0' }}%</strong>
+            <span class="grade-chip label-caps">Grade {{ interviewResult.grade }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card grade-card">
+        <span class="label-caps muted">Assigned Grade</span>
+        <div class="grade-row">
+          <div>
+            <h2 class="font-editorial">{{ reviewLabel }}</h2>
+            <p>{{ interviewResult.feedback || 'Your result has been calculated successfully.' }}</p>
+          </div>
+          <div class="grade-badge">{{ interviewResult.grade }}</div>
+        </div>
+      </article>
+
+      <article class="summary-card score-card">
+        <span class="label-caps muted">Total Score Matrix</span>
+        <div class="score-row">
+          <strong class="font-editorial">{{ interviewResult.totalScore }}</strong>
+          <span>/ {{ interviewResult.maxScore }}</span>
+        </div>
+        <div class="meter-track">
+          <div class="meter-fill" [style.width.%]="scorePercent"></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="premium-lock free-result" *ngIf="!isPremiumResult">
+      <div class="detail-column" style="margin-bottom: 4rem; text-align: left; width: 100%; max-width: 64rem;">
+        <span class="section-tag">OVERALL FEEDBACK</span>
+        <h2 class="font-editorial">Initial <i>Evaluation</i></h2>
+        <p>{{ interviewResult.feedback || 'Your answers were evaluated against the interview rubric. To see more detailed breakdown, consider upgrading.' }}</p>
+      </div>
+
+      <div class="premium-copy">
+        <div class="lock-row">
+          <span class="material-symbols-outlined">lock</span>
+          <span class="label-caps gold">Detailed Analysis Locked</span>
+        </div>
+        <h2 class="font-editorial">Unlock Deep Intelligence</h2>
+        <p>
+          Upgrade to Premium to see question-by-question breakdown, ideal answers, strengths, weaknesses, and comprehensive growth opportunities.
+        </p>
+        <button type="button" class="dark-button label-caps" routerLink="/premium">Upgrade To Premium</button>
+      </div>
+    </section>
+
+    <section class="premium-details" *ngIf="isPremiumResult">
+      <div class="detail-column">
+        <span class="section-tag">DEEP ANALYSIS</span>
+        <h2 class="font-editorial">Narrative <i>Architecture</i> &amp; Flow</h2>
+        <p>{{ interviewResult.feedback || 'Your answers were evaluated against the interview rubric.' }}</p>
+      </div>
+
+      <div class="insight-grid">
+        <article class="insight-card">
+          <h3 class="label-caps">
+            <span class="material-symbols-outlined">check_circle</span>
+            Core Strengths
+          </h3>
+          <ul>
+            <li *ngFor="let item of interviewResult.strengths?.length ? interviewResult.strengths : ['Structured delivery', 'Clear reasoning']">
+              {{ item }}
+            </li>
+          </ul>
+        </article>
+
+        <article class="insight-card warning">
+          <h3 class="label-caps">
+            <span class="material-symbols-outlined">priority_high</span>
+            Growth Opportunities
+          </h3>
+          <ul>
+            <li *ngFor="let item of interviewResult.weakAreas?.length ? interviewResult.weakAreas : ['Refine answer depth']">
+              {{ item }}
+            </li>
+          </ul>
+        </article>
+      </div>
+
+      <article class="suggestions-panel" *ngIf="interviewResult.suggestions?.length">
+        <h3 class="font-editorial">Refining Your <i>Delivery</i></h3>
+        <ol>
+          <li *ngFor="let suggestion of interviewResult.suggestions">{{ suggestion }}</li>
+        </ol>
+      </article>
+
+      <article class="breakdown-panel">
+        <div class="panel-header">
+          <h3 class="font-editorial">Answer Review</h3>
+          <span class="label-caps">{{ interviewResult.breakdown?.length || 0 }} Questions</span>
+        </div>
+        <div class="breakdown-list">
+          <article class="breakdown-item" *ngFor="let item of interviewResult.breakdown">
+            <div class="breakdown-top">
+              <span class="label-caps">{{ item.subtopic || 'General' }}</span>
+              <span class="score-pill" [class.good]="item.score >= 8" [class.warn]="item.score < 8">
+                {{ item.score }}/10
+              </span>
+            </div>
+            <h4>{{ item.text }}</h4>
+            <p><strong>Your answer:</strong> {{ item.yourAnswer || 'No answer captured.' }}</p>
+            <p><strong>Ideal answer:</strong> {{ item.correctAnswer || 'No ideal answer was returned.' }}</p>
+          </article>
+        </div>
+      </article>
+    </section>
+
+    <section class="result-actions">
+      <button type="button" class="ghost-button label-caps" (click)="viewDashboard()">View All Interviews</button>
+      <button type="button" class="dark-button label-caps" (click)="startNewInterview()">Start New Interview</button>
+    </section>
+  </ng-container>
+</main>
+
+<ng-template #loadingState>
+  <main class="result-shell">
+    <div class="loading-box label-caps">Loading interview result...</div>
+  </main>
+</ng-template>

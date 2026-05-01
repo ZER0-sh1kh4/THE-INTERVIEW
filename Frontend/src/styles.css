@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  /* Colors */
+  --color-primary: #1A1A1A;
+  --color-secondary: #D4AF37;
+  --color-background: #F9F8F6;
+  --color-on-background: #1A1A1A;
+  --color-surface: #F9F8F6;
+  --color-outline: rgba(26, 26, 26, 0.1);
+  --color-outline-strong: #747878;
+
+  /* Fonts */
+  --font-editorial: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Spacing */
+  --spacing-gutter: 24px;
+  --spacing-unit: 4px;
+  --section-py-lg: 8rem;
+  --section-py-md: 6rem;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Material Icons Setup */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Common Text Utilities */
+.font-editorial {
+  font-family: var(--font-editorial);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.label-caps {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.0;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.vertical-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.0;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  text-transform: uppercase;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+}
+
+.display-xl {
+  font-family: var(--font-editorial);
+  font-size: 80px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+
+@media (min-width: 768px) {
+  .display-xl {
+    font-size: 140px;
+  }
+}
+
+.headline-lg {
+  font-family: var(--font-editorial);
+  font-size: 56px;
+  line-height: 1.2;
+  font-weight: 400;
+}
+
+.headline-md {
+  font-family: var(--font-editorial);
+  font-size: 36px;
+  line-height: 1.3;
+  font-weight: 400;
+}
+
+.body-lg {
+  font-size: 18px;
+  line-height: 1.625;
+  font-weight: 400;
+}
+
+.body-md {
+  font-size: 16px;
+  line-height: 1.625;
+  font-weight: 400;
+}
+
+.italic { font-style: italic; }
+.uppercase { text-transform: uppercase; }
+.text-center { text-align: center; }
+
+/* Grid Background Lines */
+.grid-line {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--color-outline);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* Animations */
+.gold-hover-slide {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: color 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gold-hover-slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-secondary);
+  transition: left 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.gold-hover-slide:hover::before {
+  left: 0;
+}
+
+/* Base Form/Button Resets */
+button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

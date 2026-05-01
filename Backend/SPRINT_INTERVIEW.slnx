@@ -1,0 +1,13 @@
+<Solution>
+  <Project Path="API_Gateway/API_Gateway.csproj" />
+  <Project Path="AssessmentService/AssessmentService.csproj" />
+  <Project Path="AssessmentService.Tests/AssessmentService.Tests.csproj" />
+  <Project Path="BuildingBlocks/BuildingBlocks.csproj" />
+  <Project Path="IdentityService/IdentityService.csproj" />
+  <Project Path="IdentityService.Tests/IdentityService.Tests.csproj" />
+  <Project Path="InterviewService/InterviewService.csproj" />
+  <Project Path="InterviewService.Tests/InterviewService.Tests.csproj" />
+  <Project Path="NotificationService/NotificationService.csproj" />
+  <Project Path="SubscriptionService/SubscriptionService.csproj" />
+  <Project Path="SubscriptionService.Tests/SubscriptionService.Tests.csproj" />
+</Solution>

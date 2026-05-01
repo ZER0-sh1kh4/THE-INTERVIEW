@@ -1,0 +1,173 @@
+<!-- Assessment Result — Two distinct views: Free vs Premium -->
+<app-user-navbar></app-user-navbar>
+
+<aside class="side-label">ASSESSMENT RESULTS</aside>
+
+<!-- ══════ Loading ══════ -->
+<div class="loader-overlay" *ngIf="isLoading">
+  <span class="material-symbols-outlined spin text-gold icon-large">refresh</span>
+  <p class="label-caps mt-3">Loading Results...</p>
+</div>
+
+<!-- ══════ Error State ══════ -->
+<main class="result-shell" *ngIf="!isLoading && errorMsg && !resultData">
+  <header class="result-header text-center">
+    <span class="label-caps text-gold">Assessment</span>
+    <h1 class="font-editorial">Something <br /><i>Went Wrong</i></h1>
+    <div class="header-rule"></div>
+  </header>
+  <div class="error-content text-center">
+    <span class="material-symbols-outlined icon-large text-gold">error</span>
+    <p class="error-text">{{ errorMsg }}</p>
+    <div class="action-row">
+      <button class="btn-outline label-caps" (click)="fetchResult()">Retry</button>
+      <button class="btn-outline label-caps" (click)="goBack()">Back to Assessments</button>
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- FREE USER RESULT — Score card + Upgrade CTA (Stitch free design)    -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<main class="result-shell" *ngIf="!isLoading && resultData && !isPremium">
+  <header class="result-header">
+    <span class="label-caps text-gold">Performance Evaluation</span>
+    <h1 class="font-editorial">Performance <br /><i>Evaluation</i></h1>
+    <div class="header-rule"></div>
+  </header>
+
+  <div class="free-layout">
+    <!-- Score Ring -->
+    <div class="score-section">
+      <div class="circle-progress">
+        <span class="score-number font-editorial">{{ resultData.percentage | number:'1.0-0' }}<span class="pct">%</span></span>
+        <span class="label-caps score-sublabel">Overall Score</span>
+      </div>
+      <div class="grade-box">
+        <span class="label-caps">Grade Performance</span>
+        <span class="grade-value font-editorial">{{ resultData.grade }}</span>
+      </div>
+    </div>
+
+    <div class="score-metrics">
+      <div class="metric">
+        <span class="label-caps">Raw Score</span>
+        <span class="metric-value font-editorial">{{ resultData.score }}</span>
+      </div>
+      <div class="metric">
+        <span class="label-caps">Max Potential</span>
+        <span class="metric-value font-editorial muted">{{ resultData.maxScore }}</span>
+      </div>
+    </div>
+
+    <!-- Upgrade CTA -->
+    <div class="upgrade-banner">
+      <h2 class="font-editorial upgrade-title"><i>Unlock the full dimension of your data.</i></h2>
+      <p>Upgrade to Premium for detailed AI analysis and question-wise breakdown.</p>
+      <button class="btn-primary label-caps" (click)="upgradeToPremium()">Upgrade to Premium</button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-row-bottom">
+      <button class="btn-outline label-caps" (click)="goToHistory()">
+        <span class="material-symbols-outlined">history</span>
+        View History
+      </button>
+      <button class="btn-filled label-caps" (click)="goBack()">
+        <span class="material-symbols-outlined">add</span>
+        Start New Assessment
+      </button>
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- PREMIUM USER RESULT — Full Executive Performance Report              -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<main class="result-shell" *ngIf="!isLoading && resultData && isPremium">
+  <header class="result-header">
+    <span class="label-caps text-gold">Assessment Completed</span>
+    <h1 class="font-editorial">The Executive <br /><i>Performance Report</i></h1>
+    <div class="header-rule"></div>
+  </header>
+
+  <!-- Score Hero -->
+  <div class="premium-hero">
+    <div class="hero-left">
+      <div class="hero-badge" [ngClass]="getGradeClass()">
+        <span class="label-caps">Grade</span>
+        <span class="hero-grade font-editorial">{{ resultData.grade }}</span>
+      </div>
+      <div class="hero-ring">
+        <span class="hero-pct font-editorial">{{ resultData.percentage | number:'1.0-0' }}%</span>
+        <span class="label-caps">Aggregate Score</span>
+      </div>
+    </div>
+    <div class="hero-right">
+      <h2 class="font-editorial hero-mastery">{{ getMasteryTitle() }}</h2>
+      <p class="hero-desc">{{ getMasteryDescription() }}</p>
+      <div class="hero-metrics">
+        <div class="metric">
+          <span class="label-caps">Raw Score</span>
+          <span class="metric-value font-editorial">{{ resultData.score }} / {{ resultData.maxScore }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Strengths & Weak Areas -->
+  <div class="analysis-grid" *ngIf="resultData.weakAreas?.length || resultData.details?.length">
+    <div class="analysis-card">
+      <span class="label-caps text-gold">Strengths</span>
+      <ul>
+        <li *ngFor="let d of getCorrectDetails()">{{ d.text }}</li>
+        <li *ngIf="getCorrectDetails().length === 0">All questions need improvement.</li>
+      </ul>
+    </div>
+    <div class="analysis-card">
+      <span class="label-caps" style="color: #ba1a1a;">Areas of Refinement</span>
+      <ul>
+        <li *ngFor="let area of resultData.weakAreas">{{ area }}</li>
+        <li *ngIf="!resultData.weakAreas?.length">No weak areas identified.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Question Breakdown -->
+  <section class="breakdown-section" *ngIf="resultData.details?.length">
+    <h2 class="font-editorial breakdown-title">Transcript <i>&amp; Insights</i></h2>
+    <span class="label-caps">{{ resultData.details.length }} Questions Total</span>
+    <div class="header-rule mt-2 mb-3"></div>
+
+    <div class="q-card" *ngFor="let detail of resultData.details; let i = index">
+      <div class="q-card-header">
+        <span class="q-num font-editorial">{{ (i + 1) | number:'2.0' }}</span>
+        <p class="q-question font-editorial">{{ detail.text }}</p>
+      </div>
+      <div class="q-card-body">
+        <div class="q-col">
+          <span class="label-caps">Your Answer</span>
+          <p class="q-answer">"{{ detail.selectedOption }}"</p>
+        </div>
+        <div class="q-col">
+          <span class="label-caps text-gold">Correct Answer</span>
+          <p class="q-answer">"{{ detail.correctOption }}"</p>
+        </div>
+      </div>
+      <div class="q-card-footer">
+        <span class="q-recommendation label-caps" [class.correct]="detail.isCorrect" [class.wrong]="!detail.isCorrect">
+          {{ detail.isCorrect ? '✓ Correct' : '✗ Incorrect' }}
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section text-center">
+    <h2 class="font-editorial cta-title">Ready for the <i>Next Phase?</i></h2>
+    <div class="action-row">
+      <button class="btn-primary label-caps" (click)="goBack()">Retake Assessment</button>
+      <button class="btn-outline label-caps" (click)="goToHistory()">View History</button>
+    </div>
+  </section>
+</main>

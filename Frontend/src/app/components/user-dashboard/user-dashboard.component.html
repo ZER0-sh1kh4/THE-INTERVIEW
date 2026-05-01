@@ -1,0 +1,92 @@
+<!-- Candidate dashboard adapted from the provided UI reference and connected to AuthService state. -->
+<ng-container *ngIf="currentUser$ | async as user">
+  <app-user-navbar></app-user-navbar>
+
+  <main class="dashboard-shell">
+    <section class="welcome-section">
+      <div>
+        <h1 class="font-editorial">{{ getGreeting() }}, {{ getDisplayName(user) }}</h1>
+        <p>
+          Empowering your professional journey with AI-driven insights and rigorous assessments. Master your craft, as preparation creates precision in thought.
+        </p>
+      </div>
+      <span class="status-badge label-caps">{{ getPlanLabel(user) }} Member</span>
+    </section>
+
+    <section class="stats-grid" aria-label="Candidate statistics">
+      <article class="stat-card" *ngFor="let item of stats; let index = index">
+        <span class="label-caps">{{ item.label }}</span>
+        <strong class="font-editorial">{{ index === 3 ? getPlanLabel(user) : item.value }}</strong>
+      </article>
+    </section>
+
+    <section class="quick-actions" aria-label="Quick actions">
+      <button type="button" class="primary-action label-caps" routerLink="/interviews/start">
+        Start Interview
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
+      <button type="button" class="secondary-action label-caps" routerLink="/assessments/domain">
+        Take Assessment
+        <span class="material-symbols-outlined">quiz</span>
+      </button>
+      <button type="button" class="secondary-action muted-action label-caps" routerLink="/premium">
+        Upgrade Plan
+        <span class="material-symbols-outlined">star</span>
+      </button>
+    </section>
+
+    <section class="activity-grid">
+      <article class="activity-panel">
+        <div class="panel-heading">
+          <h2 class="font-editorial">Recent Interviews</h2>
+          <button type="button" class="text-link label-caps" routerLink="/interviews/history">View All</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of recentInterviews">
+              <td>
+                <a *ngIf="getStatusLink(row); else plainDomain" [routerLink]="row.link" class="row-link">{{ row.domain }}</a>
+                <ng-template #plainDomain>{{ row.domain }}</ng-template>
+              </td>
+              <td>
+                <a *ngIf="getStatusLink(row); else plainStatus" [routerLink]="row.link" class="row-pill row-pill-link">{{ row.status }}</a>
+                <ng-template #plainStatus><span class="row-pill">{{ row.status }}</span></ng-template>
+              </td>
+              <td>{{ row.date }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="activity-panel">
+        <div class="panel-heading">
+          <h2 class="font-editorial">Recent Assessments</h2>
+          <button type="button" class="text-link label-caps" routerLink="/assessments/history">View All</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th>Grade</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of recentAssessments">
+              <td>{{ row.domain }}</td>
+              <td class="grade-cell">{{ row.grade }}</td>
+              <td>{{ row.date }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+  </main>
+</ng-container>

@@ -1,0 +1,81 @@
+<!-- Grid Background Lines -->
+<div class="grid-line line-1"></div>
+<div class="grid-line line-2"></div>
+<div class="grid-line line-3"></div>
+<div class="grid-line line-4"></div>
+<div class="grid-line line-5"></div>
+<div class="grid-line line-6"></div>
+
+<!-- Processing State -->
+<main class="success-shell" *ngIf="isProcessing">
+  <div class="processing-state">
+    <div class="spinner-large"></div>
+    <h2 class="font-editorial">Confirming Payment...</h2>
+    <p>Please wait while we activate your premium membership.</p>
+  </div>
+</main>
+
+<!-- Success State -->
+<main class="success-shell" *ngIf="!isProcessing && isSuccess">
+  <div class="success-content">
+    <div class="success-hero">
+      <div class="success-badge">
+        <span class="material-symbols-outlined">verified</span>
+      </div>
+      <span class="label-caps gold">Successful Transaction</span>
+      <h1 class="font-editorial">Access <i>Granted</i></h1>
+      <p class="success-desc">
+        Your elevation to the Premium tier is complete. Unlimited interviews, detailed AI feedback,
+        and comprehensive analytics are now at your disposal.
+      </p>
+    </div>
+
+    <!-- Feature Unlocked Cards -->
+    <section class="unlocked-grid">
+      <article class="unlock-card">
+        <span class="unlock-num label-caps">01</span>
+        <span class="material-symbols-outlined gold-icon">all_inclusive</span>
+        <h3 class="font-editorial">Unlimited Access</h3>
+        <p>No limits on interviews or assessments. Practice as much as you need.</p>
+      </article>
+      <article class="unlock-card">
+        <span class="unlock-num label-caps">02</span>
+        <span class="material-symbols-outlined gold-icon">psychology</span>
+        <h3 class="font-editorial">AI Analysis</h3>
+        <p>Receive detailed question-by-question feedback with ideal answer comparisons.</p>
+      </article>
+      <article class="unlock-card">
+        <span class="unlock-num label-caps">03</span>
+        <span class="material-symbols-outlined gold-icon">trending_up</span>
+        <h3 class="font-editorial">Analytics</h3>
+        <p>Track your performance growth with extended metrics and progress insights.</p>
+      </article>
+    </section>
+
+    <!-- Action Buttons -->
+    <section class="success-actions">
+      <button type="button" class="action-button primary gold-hover-slide" (click)="goToDashboard()">
+        Go to Dashboard
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
+      <button type="button" class="action-button secondary" (click)="startInterview()">
+        Start Interview
+      </button>
+      <button type="button" class="action-button secondary" (click)="takeAssessment()">
+        Take Assessment
+      </button>
+    </section>
+  </div>
+</main>
+
+<!-- Error State -->
+<main class="success-shell" *ngIf="!isProcessing && !isSuccess && errorMsg">
+  <div class="error-state">
+    <span class="material-symbols-outlined error-icon">error_outline</span>
+    <h2 class="font-editorial">Something Went Wrong</h2>
+    <p>{{ errorMsg }}</p>
+    <button type="button" class="action-button primary" (click)="goToPlans()">
+      Back to Plans
+    </button>
+  </div>
+</main>

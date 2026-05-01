@@ -1,0 +1,209 @@
+/* Extends the base editorial styles to support the domain cards grid */
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(26, 26, 26, 0.035) 1px, transparent 1px) 0 0 / 8.333% 100%,
+    var(--color-background);
+  color: var(--color-primary);
+}
+
+.side-label {
+  position: fixed;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  color: rgba(26, 26, 26, 0.2);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  z-index: 1;
+}
+
+.setup-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 5rem 2rem 6rem;
+}
+
+.setup-header {
+  margin-bottom: 5rem;
+}
+
+.text-gold {
+  color: var(--color-secondary);
+}
+
+.label-caps {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.setup-header h1 {
+  margin: 1rem 0 2rem;
+  font-size: clamp(4rem, 8vw, 6.5rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.font-editorial {
+  font-family: var(--font-editorial);
+}
+
+.header-rule {
+  height: 1px;
+  background: rgba(26, 26, 26, 0.1);
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-top: 1px solid rgba(26, 26, 26, 0.2);
+  border-left: 1px solid rgba(26, 26, 26, 0.2);
+}
+
+.domain-card {
+  cursor: pointer;
+  border-right: 1px solid rgba(26, 26, 26, 0.2);
+  border-bottom: 1px solid rgba(26, 26, 26, 0.2);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 380px;
+  background: transparent;
+  transition: background-color 0.5s ease;
+}
+
+.domain-card:hover {
+  background: rgba(26, 26, 26, 0.04);
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.card-top .label-caps {
+  color: rgba(26, 26, 26, 0.4);
+}
+
+.card-icon {
+  color: rgba(26, 26, 26, 0.2);
+  transition: color 0.3s ease;
+}
+
+.domain-card:hover .card-icon {
+  color: var(--color-secondary);
+}
+
+.domain-card h3 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 400;
+}
+
+.desc {
+  color: rgba(26, 26, 26, 0.6);
+  font-size: 1rem;
+  max-width: 250px;
+  line-height: 1.6;
+}
+
+.card-action {
+  margin-top: 3rem;
+}
+
+.card-action .label-caps {
+  transition: color 0.3s ease;
+}
+
+.domain-card:hover .card-action .label-caps {
+  color: var(--color-secondary);
+}
+
+.underline-expand {
+  width: 0%;
+  height: 1px;
+  background-color: var(--color-secondary);
+  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 0.5rem;
+}
+
+.domain-card:hover .underline-expand {
+  width: 100%;
+}
+
+.quote-section {
+  margin-top: 6rem;
+  display: flex;
+  justify-content: center;
+}
+
+.quote-text {
+  max-width: 600px;
+  text-align: center;
+}
+
+.quote-text p {
+  font-size: 2.5rem;
+  font-style: italic;
+  color: rgba(26, 26, 26, 0.8);
+  line-height: 1.2;
+}
+
+.quote-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.quote-label .line {
+  width: 2rem;
+  height: 1px;
+  background-color: var(--color-secondary);
+}
+
+.quote-label .label-caps {
+  color: var(--color-secondary);
+}
+
+.setup-footer {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.1);
+  color: rgba(26, 26, 26, 0.45);
+}
+
+.setup-footer div {
+  display: flex;
+  gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .side-label {
+    display: none;
+  }
+}

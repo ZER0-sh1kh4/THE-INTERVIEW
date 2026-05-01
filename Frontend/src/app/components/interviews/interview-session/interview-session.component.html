@@ -1,0 +1,192 @@
+<!-- Voice-enabled interview session page with fullscreen enforcement and anti-cheating detection. -->
+<div class="grid-line line-a"></div>
+<div class="grid-line line-b"></div>
+<div class="grid-line line-c"></div>
+<div class="grid-line line-d"></div>
+
+<nav class="session-nav">
+  <div class="session-brand">
+    <span class="font-editorial">THE INTERVIEW</span>
+    <i></i>
+    <small class="label-caps">Session ID: LX-{{ interviewId }}</small>
+  </div>
+  <div class="session-tools">
+    <span class="time-block">
+      <small class="label-caps">Questions</small>
+      <strong>{{ questions.length }}</strong>
+    </span>
+    <span class="time-block warning-counter" *ngIf="tabSwitchCount > 0">
+      <small class="label-caps">Warnings</small>
+      <strong class="warning-count">{{ tabSwitchCount }}/3</strong>
+    </span>
+    <button type="button" class="icon-button material-symbols-outlined" title="Settings">settings</button>
+    <button type="button" class="icon-button material-symbols-outlined" title="End interview" (click)="endInterview()">close</button>
+  </div>
+</nav>
+
+<!-- Anti-Cheating Warning Modal (matches Assessment theme) -->
+<div class="modal-overlay" *ngIf="showWarningOverlay" (click)="$event.stopPropagation()">
+  <div class="warning-modal">
+    <span class="material-symbols-outlined warning-icon">{{ tabSwitchCount >= 3 ? 'gavel' : 'warning' }}</span>
+    <h3 class="font-editorial">{{ warningTitle }}</h3>
+    <p>{{ warningMessage }}</p>
+    <small class="label-caps warning-meta-line">Violation {{ tabSwitchCount }} of 3</small>
+    <button class="warning-btn label-caps" *ngIf="tabSwitchCount < 3" (click)="dismissWarning()">
+      I UNDERSTAND
+    </button>
+    <div class="auto-submit-status label-caps" *ngIf="tabSwitchCount >= 3">
+      <span class="pulse-dot active"></span>
+      Auto-submitting your responses...
+    </div>
+  </div>
+</div>
+
+<main class="session-shell" *ngIf="!isLoading; else loadingState">
+  <div class="error-box" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="success-box" *ngIf="submitMsg">{{ submitMsg }} <span *ngIf="resultSummary">{{ resultSummary }}</span></div>
+
+  <ng-container *ngIf="currentQuestion as question; else noQuestionState">
+    <header class="progress-header">
+      <div class="progress-line">
+        <span class="label-caps">Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</span>
+        <i></i>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" [style.width.%]="progressPercent"></div>
+      </div>
+    </header>
+
+    <section class="question-section">
+      <button type="button" class="speaker-button" title="Read Question Aloud" (click)="speakCurrentQuestion()">
+        <span class="material-symbols-outlined">{{ isSpeaking ? 'volume_up' : 'volume_up' }}</span>
+      </button>
+      <div class="question-copy">
+        <h1 class="font-editorial">"{{ question.text }}"</h1>
+        <p>Answer clearly. Start recording and speak until you are finished; the live transcript below is saved as your response.</p>
+      </div>
+    </section>
+
+
+
+    <section class="response-panel">
+      <div class="response-label">
+        <span>Input Response</span>
+      </div>
+
+      <div class="response-body">
+        <div class="recording-row">
+          <div class="recording-state" [class.active]="isRecording">
+            <span class="pulse-dot"></span>
+            <strong class="label-caps">{{ isRecording ? 'Recording Active' : 'Recording Paused' }}</strong>
+          </div>
+          <div class="waveform" [class.active]="isRecording" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+        </div>
+
+        <textarea
+          name="transcript"
+          [(ngModel)]="transcript"
+          (ngModelChange)="saveCurrentAnswer()"
+          placeholder="Speak or type your response here..."
+        ></textarea>
+
+        <p class="transcript-status label-caps">{{ transcriptStatus }}</p>
+
+        <div class="response-meta">
+          <div>
+            <span class="label-caps">Word Count: {{ wordCount }}</span>
+            <span class="label-caps">Saved: {{ (answers[question.id] || '').trim() ? 'Yes' : 'No' }}</span>
+            <span class="label-caps" *ngIf="missingQuestionNumbers.length">Pending: {{ missingQuestionNumbers.join(', ') }}</span>
+          </div>
+          <button type="button" class="mic-button label-caps" [class.recording]="isRecording" (click)="toggleRecording()">
+            <span class="material-symbols-outlined">{{ isRecording ? 'stop' : 'mic' }}</span>
+            {{ isRecording ? 'Stop Recording' : 'Start Recording' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="session-footer">
+      <button type="button" class="nav-button" (click)="previousQuestion()" [disabled]="currentQuestionIndex === 0">
+        <span class="material-symbols-outlined">arrow_back</span>
+        <span class="label-caps">Previous</span>
+      </button>
+
+      <div class="footer-actions">
+        <button
+          type="button"
+          class="primary-session-button label-caps"
+          *ngIf="currentQuestionIndex < questions.length - 1"
+          (click)="nextQuestion()"
+        >
+          Next Question
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <button
+          type="button"
+          class="primary-session-button label-caps"
+          *ngIf="currentQuestionIndex === questions.length - 1"
+          (click)="submitInterview()"
+        >
+          Submit Interview
+          <span class="material-symbols-outlined">done</span>
+        </button>
+      </div>
+    </footer>
+  </ng-container>
+
+  <ng-template #noQuestionState>
+    <section class="empty-question">
+      <h1 class="font-editorial">No visible questions were returned for this session.</h1>
+      <p>If Gemini is still generating questions, run the AI generation flow again in a moment.</p>
+      <div class="empty-actions">
+        <button type="button" class="primary-session-button label-caps" (click)="loadQuestions()">Generate Questions Again</button>
+        <button type="button" class="nav-button label-caps" routerLink="/interviews/start">Back To Interview Setup</button>
+      </div>
+    </section>
+  </ng-template>
+</main>
+
+<ng-template #loadingState>
+  <main class="session-shell">
+    <div class="loading-box label-caps">Loading interview questions...</div>
+  </main>
+</ng-template>
+
+<aside class="session-side">
+  <header>
+    <span class="label-caps">Session Live Record</span>
+    <strong>Q{{ currentQuestionIndex + 1 || 0 }}</strong>
+  </header>
+
+  <div class="side-status">
+    <span class="pulse-dot" [class.active]="isRecording"></span>
+    <small class="label-caps">{{ isRecording ? 'Recording' : 'Paused' }}</small>
+  </div>
+
+  <nav class="question-map" aria-label="Question list">
+    <button
+      type="button"
+      *ngFor="let question of questions; let index = index"
+      [class.active]="index === currentQuestionIndex"
+      [class.answered]="(answers[question.id] || '').trim()"
+      (click)="goToQuestion(index)"
+    >
+      {{ index + 1 }}
+    </button>
+  </nav>
+
+
+
+  <!-- Warning indicator in sidebar -->
+  <div class="side-warning-indicator" *ngIf="tabSwitchCount > 0">
+    <span class="material-symbols-outlined">warning</span>
+    <small class="label-caps">{{ tabSwitchCount }}/3 Warnings</small>
+  </div>
+
+  <footer>
+    <span class="label-caps">Words {{ wordCount }}</span>
+    <span class="label-caps">V.01.2026</span>
+  </footer>
+</aside>

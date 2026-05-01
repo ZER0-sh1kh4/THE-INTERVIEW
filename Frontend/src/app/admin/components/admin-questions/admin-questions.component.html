@@ -1,0 +1,132 @@
+<app-admin-navbar></app-admin-navbar>
+
+<main class="admin-main">
+  <header class="page-header">
+    <span class="header-label">REPOSITORY.04</span>
+    <h1 class="page-title">Question Repository</h1>
+    <div class="title-bar"></div>
+  </header>
+
+  <!-- Domain Filter Tabs + Add Button -->
+  <div class="toolbar">
+    <div class="domain-tabs">
+      <button class="domain-tab" [class.domain-tab--active]="domainFilter === ''" (click)="domainFilter=''; applyFilters()">ALL DOMAINS</button>
+      <button *ngFor="let d of domains" class="domain-tab" [class.domain-tab--active]="domainFilter === d" (click)="domainFilter=d; applyFilters()">{{ d | uppercase }}</button>
+    </div>
+    <button class="btn-add" (click)="openCreate()">
+      <span class="material-symbols-outlined">add</span>
+      ADD QUESTION
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">Loading question repository...</div>
+  <div *ngIf="error" class="error-state">{{ error }}</div>
+
+  <div *ngIf="!isLoading && !error" class="table-container">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Domain</th>
+            <th>Question Text</th>
+            <th>Subtopic</th>
+            <th>Correct</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let q of filteredQuestions" class="question-row">
+            <td class="id-cell">#Q-{{ q.id }}</td>
+            <td class="domain-label">{{ q.domain | uppercase }}</td>
+            <td class="question-text">
+              <p class="question-preview">{{ q.text }}</p>
+            </td>
+            <td class="subtopic-cell">{{ q.subtopic | uppercase }}</td>
+            <td class="correct-cell">OPTION {{ q.correctOption }}</td>
+            <td class="actions-cell">
+              <div class="action-icons">
+                <button class="icon-btn" (click)="openEdit(q)" title="Edit"><span class="material-symbols-outlined">edit</span></button>
+                <button class="icon-btn icon-btn--danger" (click)="promptDelete(q)" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p *ngIf="filteredQuestions.length === 0" class="no-data">No questions found in this domain.</p>
+  </div>
+</main>
+
+<!-- Create / Edit Drawer (Stitch side panel) -->
+<div *ngIf="showModal" class="drawer-backdrop" (click)="closeModal()">
+  <div class="drawer-panel" (click)="$event.stopPropagation()">
+    <div class="drawer-header">
+      <h2 class="drawer-title">{{ isEditing ? 'Edit Question' : 'Add New Question' }}</h2>
+      <button class="drawer-close" (click)="closeModal()"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <form class="drawer-form" (ngSubmit)="saveQuestion()">
+      <div class="form-field">
+        <label class="form-label">SELECT DOMAIN</label>
+        <select [(ngModel)]="formDomain" name="domain" class="form-select">
+          <option value="">— Select Existing Domain —</option>
+          <option *ngFor="let d of domains" [value]="d">{{ d }}</option>
+          <option value="__new">+ Create New Domain...</option>
+        </select>
+        <ng-container *ngIf="formDomainIsNew">
+          <input [(ngModel)]="formDomainCustom" name="domainCustom" class="form-input" placeholder="Enter new domain name..." style="margin-top: 0.75rem;" />
+          <p class="form-hint">⚠ This will create a new domain in the database. Please double-check spelling.</p>
+        </ng-container>
+      </div>
+      <div class="form-field">
+        <label class="form-label">QUESTION TEXT</label>
+        <textarea [(ngModel)]="formText" name="text" class="form-textarea" rows="4" placeholder="Enter the question text..."></textarea>
+      </div>
+      <div class="form-field">
+        <label class="form-label">SUBTOPIC / CATEGORY</label>
+        <input type="text" [(ngModel)]="formSubtopic" name="subtopic" class="form-input" placeholder="e.g., Performance Optimization" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">OPTIONS & CORRECT SELECTION</label>
+        <div class="option-row">
+          <input type="radio" [(ngModel)]="formCorrectOption" name="correct" value="A" class="option-radio" />
+          <input type="text" [(ngModel)]="formOptionA" name="optA" class="option-input" placeholder="Option A" />
+        </div>
+        <div class="option-row">
+          <input type="radio" [(ngModel)]="formCorrectOption" name="correct" value="B" class="option-radio" />
+          <input type="text" [(ngModel)]="formOptionB" name="optB" class="option-input" placeholder="Option B" />
+        </div>
+        <div class="option-row">
+          <input type="radio" [(ngModel)]="formCorrectOption" name="correct" value="C" class="option-radio" />
+          <input type="text" [(ngModel)]="formOptionC" name="optC" class="option-input" placeholder="Option C" />
+        </div>
+        <div class="option-row">
+          <input type="radio" [(ngModel)]="formCorrectOption" name="correct" value="D" class="option-radio" />
+          <input type="text" [(ngModel)]="formOptionD" name="optD" class="option-input" placeholder="Option D" />
+        </div>
+      </div>
+
+      <p *ngIf="saveError" class="form-error">{{ saveError }}</p>
+
+      <div class="drawer-actions">
+        <button type="button" class="btn-discard" (click)="closeModal()">Discard</button>
+        <button type="submit" class="btn-save" [disabled]="isSaving">{{ isSaving ? 'Saving...' : 'Save Entry' }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation -->
+<div *ngIf="showDeleteDialog" class="modal-backdrop" (click)="cancelDelete()">
+  <div class="modal-content modal-content--danger" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">Confirm Delete</h2>
+    <p class="modal-body">Are you sure you want to permanently remove this question?</p>
+    <p class="modal-body"><strong>{{ deleteTarget?.text }}</strong></p>
+    <div class="modal-actions">
+      <button class="btn-discard" (click)="cancelDelete()">Cancel</button>
+      <button class="btn-danger" (click)="confirmDelete()" [disabled]="isDeleting">
+        {{ isDeleting ? 'Deleting...' : 'Delete Question' }}
+      </button>
+    </div>
+  </div>
+</div>

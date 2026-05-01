@@ -1,0 +1,344 @@
+/* Purpose: Styles the interview history archive in the project's editorial interface. */
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #fdf8f8;
+  color: #1c1b1b;
+}
+
+.history-grid-line {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(28, 27, 27, 0.07);
+  pointer-events: none;
+}
+
+.line-1 { left: 8.33%; }
+.line-2 { left: 16.66%; }
+.line-3 { left: 25%; }
+.line-4 { left: 75%; }
+.line-5 { left: 91.66%; }
+
+.history-nav,
+.history-links,
+.history-shell,
+.filter-bar,
+.status-filter {
+  display: flex;
+  align-items: center;
+}
+
+.history-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.5rem 3rem;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.16);
+  background: #f2f2f2;
+}
+
+.brand {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.history-links {
+  gap: 2.5rem;
+}
+
+.history-links a,
+.dark-button,
+.ghost-button,
+.status-filter button {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.history-links a {
+  color: rgba(26, 26, 26, 0.48);
+}
+
+.history-links .active {
+  color: #1c1b1b;
+  border-bottom: 1px solid #d4af37;
+  padding-bottom: 0.35rem;
+}
+
+.dark-button,
+.ghost-button {
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid #1c1b1b;
+}
+
+.dark-button {
+  background: #1c1b1b;
+  color: #fff;
+}
+
+.ghost-button {
+  background: transparent;
+}
+
+.history-shell {
+  align-items: stretch;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 4rem 3rem 6rem;
+}
+
+.history-side {
+  width: 20rem;
+  flex: 0 0 20rem;
+  padding: 2rem 2rem 2rem 0;
+  border-right: 1px solid rgba(26, 26, 26, 0.12);
+}
+
+.side-kicker,
+.text-gold {
+  color: #735c00;
+}
+
+.metric-block {
+  padding: 2.5rem 0;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.metric-block span,
+.metric-block small {
+  color: rgba(26, 26, 26, 0.45);
+}
+
+.metric-block strong {
+  display: block;
+  margin: 1rem 0 0.35rem;
+  font-size: 3.8rem;
+  font-weight: 400;
+}
+
+blockquote {
+  margin: 3rem 0 0;
+  padding: 1.5rem;
+  border: 1px solid #1c1b1b;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+blockquote .material-symbols-outlined {
+  color: #d4af37;
+}
+
+blockquote p {
+  margin: 1rem 0 0;
+  font-size: 1.7rem;
+  line-height: 1.25;
+  font-style: italic;
+}
+
+.history-content {
+  min-width: 0;
+  flex: 1;
+  padding-left: 3rem;
+}
+
+.history-hero {
+  padding: 2rem 0 4rem;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  border-bottom: 1px solid #1c1b1b;
+}
+
+.history-hero h1 {
+  margin: 1rem 0 0;
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  line-height: 1.05;
+  font-weight: 400;
+}
+
+.total-pill {
+  padding: 0.8rem 1rem;
+  border: 1px solid #1c1b1b;
+  white-space: nowrap;
+}
+
+.filter-bar {
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.status-filter {
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.status-filter span {
+  color: var(--color-secondary);
+  font-weight: 700;
+  margin-right: 0.5rem;
+  padding-right: 1.5rem;
+  border-right: 1px solid var(--color-outline);
+}
+
+.status-filter button {
+  padding-bottom: 0.35rem;
+  color: rgba(26, 26, 26, 0.45);
+}
+
+.status-filter button.active {
+  color: #1c1b1b;
+  border-bottom: 1px solid #1c1b1b;
+}
+
+.history-table {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th {
+  padding: 2rem 1rem 1.25rem 0;
+  border-bottom: 1px solid #1c1b1b;
+  color: rgba(26, 26, 26, 0.45);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+td {
+  padding: 2rem 1rem 2rem 0;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+  color: rgba(26, 26, 26, 0.68);
+  vertical-align: top;
+}
+
+td strong {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #1c1b1b;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+td .label-caps {
+  color: rgba(26, 26, 26, 0.4);
+}
+
+.status-pill {
+  display: inline-flex;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(26, 26, 26, 0.18);
+  color: rgba(26, 26, 26, 0.54);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-pill.completed {
+  border-color: #1c1b1b;
+  background: #1c1b1b;
+  color: #fff;
+}
+
+.status-pill.pending {
+  background: rgba(212, 175, 55, 0.12);
+  color: #735c00;
+}
+
+.grade-text {
+  font-family: var(--font-editorial);
+  color: #1c1b1b;
+  font-size: 1.35rem;
+}
+
+.action-link {
+  color: #1c1b1b;
+  text-decoration-color: #d4af37;
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.45rem;
+}
+
+.loading-state,
+.error-box,
+.empty-history {
+  margin-top: 2rem;
+  padding: 2rem;
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  background: rgba(212, 175, 55, 0.03);
+  color: var(--color-secondary);
+  text-align: center;
+}
+
+.loading-state {
+  font-style: italic;
+  letter-spacing: 0.2em;
+}
+
+.error-box {
+  border-color: rgba(186, 26, 26, 0.35);
+  background: rgba(186, 26, 26, 0.05);
+  color: #ba1a1a;
+}
+
+.empty-history {
+  padding: 3rem;
+  color: #1c1b1b;
+}
+
+.empty-history h2 {
+  margin: 0 0 1rem;
+  font-size: 3rem;
+  font-weight: 400;
+}
+
+.empty-history p {
+  margin: 0 0 2rem;
+  color: rgba(26, 26, 26, 0.62);
+}
+
+@media (max-width: 1024px) {
+  .history-nav,
+  .history-shell,
+  .history-hero,
+  .filter-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .history-shell {
+    padding-inline: 1rem;
+  }
+
+  .history-side {
+    width: 100%;
+    flex-basis: auto;
+    padding-right: 0;
+    border-right: 0;
+    border-bottom: 1px solid rgba(26, 26, 26, 0.12);
+  }
+
+  .history-content {
+    width: 100%;
+    padding-left: 0;
+  }
+
+  .history-links {
+    flex-wrap: wrap;
+  }
+}

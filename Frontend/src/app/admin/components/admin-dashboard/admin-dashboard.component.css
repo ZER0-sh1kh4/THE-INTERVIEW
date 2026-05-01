@@ -1,0 +1,209 @@
+/* Admin Dashboard — matches candidate dashboard theme (top navbar, no sidebar) */
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(26, 26, 26, 0.035) 1px, transparent 1px) 0 0 / 8.333% 100%,
+    var(--color-background);
+  color: var(--color-primary);
+}
+
+.admin-main {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 5rem 2rem 6rem;
+}
+
+/* ── Page Header ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 3rem 0 4rem;
+}
+
+.page-title {
+  margin: 0;
+  font-family: var(--font-editorial);
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 1.05;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.header-line {
+  flex-grow: 1;
+  height: 1px;
+  margin-top: 2rem;
+  background: var(--color-outline);
+}
+
+.header-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.48;
+  white-space: nowrap;
+  margin-top: 2rem;
+}
+
+/* ── Stats Grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border-top: 2px solid var(--color-primary);
+}
+
+.stat-card {
+  min-height: 11rem;
+  padding: 2rem;
+  border-right: 1px solid var(--color-outline);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.5s ease;
+}
+
+.stat-card:last-child { border-right: 0; }
+.stat-card:hover { background: rgba(26, 26, 26, 0.03); }
+.stat-card--highlight { background: rgba(212, 175, 55, 0.06); }
+
+.stat-label {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.48;
+}
+
+.stat-value {
+  font-family: var(--font-editorial);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1;
+  margin: 0;
+}
+
+.stat-value--gold { color: var(--color-secondary); }
+
+.stat-sub {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  opacity: 0.48;
+}
+
+/* ── Content Grid ── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 4rem;
+  padding-top: 5rem;
+  border-top: 1px solid var(--color-outline);
+  margin-top: 3rem;
+}
+
+/* ── Payments Column ── */
+.section-title {
+  font-family: var(--font-editorial);
+  font-size: 2rem;
+  font-style: italic;
+  font-weight: 400;
+  margin: 0 0 2rem;
+}
+
+.payment-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.payment-item { border-bottom: 1px solid var(--color-outline); padding-bottom: 1.25rem; }
+.payment-top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.25rem; }
+.payment-user { font-family: var(--font-body); font-size: 1rem; font-weight: 700; margin: 0; }
+.payment-amount { color: var(--color-secondary); font-weight: 700; font-family: var(--font-body); }
+.payment-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+.payment-date {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.48;
+  margin: 0;
+}
+
+/* ── Users Column ── */
+.users-column { border-left: 1px solid var(--color-outline); padding-left: 3rem; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.view-all-link {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-primary);
+  border-bottom: 1px solid rgba(26, 26, 26, 0.24);
+  padding-bottom: 0.35rem;
+}
+.view-all-link:hover { color: var(--color-secondary); border-color: var(--color-secondary); }
+
+/* ── Data Table ── */
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; text-align: left; border-collapse: collapse; font-family: var(--font-body); }
+.data-table th {
+  padding: 0 0 1.25rem;
+  border-bottom: 2px solid var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.data-table td {
+  padding: 1.5rem 0.5rem;
+  border-bottom: 1px solid var(--color-outline);
+  color: rgba(26, 26, 26, 0.72);
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+.data-table tr:hover td { color: var(--color-primary); }
+
+.user-cell { display: flex; flex-direction: column; }
+.user-name { font-weight: 700; color: var(--color-primary); }
+.user-email { font-size: 0.75rem; opacity: 0.48; }
+.role-cell { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.72; }
+.date-cell { opacity: 0.48; }
+
+/* ── Status Pills ── */
+.status-pill {
+  display: inline-block;
+  padding: 0.25rem 0.55rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.status-pill--active, .status-pill--success { background: rgba(212, 175, 55, 0.14); color: #735c00; }
+.status-pill--pending { background: rgba(26, 26, 26, 0.06); color: rgba(26, 26, 26, 0.48); }
+.status-pill--failed, .status-pill--cancelled { background: rgba(186, 26, 26, 0.08); color: #93000a; }
+
+.loading-state, .error-state { font-family: var(--font-body); font-style: italic; padding: 4rem 0; text-align: center; color: rgba(26, 26, 26, 0.48); }
+.error-state { color: #ba1a1a; }
+.no-data { font-family: var(--font-body); font-style: italic; color: rgba(26, 26, 26, 0.48); padding: 2rem 0; }
+
+@media (max-width: 1080px) {
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .content-grid { grid-template-columns: 1fr; }
+  .users-column { border-left: none; padding-left: 0; border-top: 1px solid var(--color-outline); padding-top: 3rem; }
+}
+
+@media (max-width: 680px) {
+  .admin-main { padding: 3rem 1rem 4rem; }
+  .page-title { font-size: 2rem; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-card { border-right: 0; border-bottom: 1px solid var(--color-outline); }
+}

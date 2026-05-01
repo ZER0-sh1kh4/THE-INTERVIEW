@@ -1,0 +1,260 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(26, 26, 26, 0.035) 1px, transparent 1px) 0 0 / 8.333% 100%,
+    var(--color-background);
+  color: var(--color-primary);
+}
+
+/* Grid lines */
+.grid-line {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(26, 26, 26, 0.035);
+  z-index: 0;
+  pointer-events: none;
+}
+.line-1 { left: 8.33%; }
+.line-2 { left: 25%; }
+.line-3 { left: 41.66%; }
+.line-4 { left: 58.33%; }
+.line-5 { left: 75%; }
+.line-6 { left: 91.66%; }
+
+.success-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+}
+
+/* ─── Processing State ─── */
+.processing-state {
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.processing-state h2 {
+  margin: 2rem 0 0.5rem;
+  font-size: 2.5rem;
+  font-weight: 400;
+}
+
+.processing-state p {
+  font-size: 1.1rem;
+  color: rgba(26, 26, 26, 0.6);
+}
+
+.spinner-large {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(26, 26, 26, 0.1);
+  border-top-color: #d4af37;
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Success Content ─── */
+.success-content {
+  max-width: 960px;
+  width: 100%;
+  animation: slideUp 0.6s ease;
+}
+
+.success-hero {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.success-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border: 2px solid #d4af37;
+  margin-bottom: 1.5rem;
+  animation: scaleIn 0.5s ease 0.3s both;
+}
+
+.success-badge .material-symbols-outlined {
+  font-size: 3rem;
+  color: #d4af37;
+}
+
+.gold {
+  color: #d4af37;
+}
+
+.success-hero h1 {
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 1.1;
+  font-weight: 400;
+  margin: 1rem 0;
+}
+
+.success-desc {
+  max-width: 560px;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: rgba(26, 26, 26, 0.7);
+}
+
+/* ─── Unlocked Features Grid ─── */
+.unlocked-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 4rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.1);
+  padding-top: 3rem;
+}
+
+.unlock-card {
+  padding: 2rem;
+  border: 1px solid rgba(26, 26, 26, 0.1);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.unlock-card:hover {
+  border-color: #d4af37;
+  transform: translateY(-4px);
+}
+
+.unlock-num {
+  display: block;
+  margin-bottom: 1rem;
+  color: rgba(26, 26, 26, 0.3);
+}
+
+.gold-icon {
+  color: #d4af37;
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.unlock-card h3 {
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin: 0 0 0.75rem;
+}
+
+.unlock-card p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(26, 26, 26, 0.65);
+  margin: 0;
+}
+
+/* ─── Action Buttons ─── */
+.success-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.5rem;
+  padding: 0 2rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #1a1a1a;
+}
+
+.action-button.primary {
+  background: #1a1a1a;
+  color: #f9f8f6;
+}
+
+.action-button.primary:hover {
+  background: #d4af37;
+  border-color: #d4af37;
+  color: #1a1a1a;
+}
+
+.action-button.secondary {
+  background: transparent;
+  color: #1a1a1a;
+}
+
+.action-button.secondary:hover {
+  background: #1a1a1a;
+  color: #f9f8f6;
+}
+
+/* ─── Error State ─── */
+.error-state {
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.error-icon {
+  font-size: 3rem;
+  color: #ba1a1a;
+}
+
+.error-state h2 {
+  margin: 1rem 0 0.5rem;
+  font-size: 2.5rem;
+  font-weight: 400;
+}
+
+.error-state p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: rgba(26, 26, 26, 0.6);
+  max-width: 480px;
+  margin: 0 auto 2rem;
+}
+
+/* ─── Animations ─── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .unlocked-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .success-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-button {
+    justify-content: center;
+  }
+}
