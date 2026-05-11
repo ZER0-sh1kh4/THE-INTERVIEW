@@ -1,0 +1,104 @@
+<!-- Environment validation page shown before entering the live interview session. -->
+<app-user-navbar></app-user-navbar>
+
+<aside class="side-label">SYSTEM VALIDATION - PRE-FLIGHT CHECK</aside>
+
+<main class="preflight-shell">
+  <header class="preflight-header">
+    <span class="label-caps text-gold">Step 02 / Validation</span>
+    <h1 class="font-editorial">Environment <br /><i>Check</i></h1>
+    <p class="header-subtitle">We're validating your system and preparing your interview. This ensures a smooth, uninterrupted session.</p>
+    <div class="header-rule"></div>
+  </header>
+
+  <section class="checks-container">
+    <div
+      class="check-row"
+      *ngFor="let check of checkList; let i = index"
+      [class.pass]="check.status === 'pass'"
+      [class.fail]="check.status === 'fail'"
+      [class.warn]="check.status === 'warn'"
+      [class.checking]="check.status === 'checking'"
+      [class.pending]="check.status === 'pending'"
+    >
+      <div class="check-index label-caps">{{ (i + 1).toString().padStart(2, '0') }}</div>
+      <div class="check-icon">
+        <span class="material-symbols-outlined" [class.spin]="check.status === 'checking'">
+          {{ getIcon(check.status) }}
+        </span>
+      </div>
+      <div class="check-info">
+        <strong>{{ check.label }}</strong>
+        <small class="label-caps">{{ check.description }}</small>
+      </div>
+      <div class="check-badge label-caps">
+        <span *ngIf="check.status === 'pass'">Passed</span>
+        <span *ngIf="check.status === 'fail'">Failed</span>
+        <span *ngIf="check.status === 'warn'">Warning</span>
+        <span *ngIf="check.status === 'checking'">Checking...</span>
+        <span *ngIf="check.status === 'pending'">Waiting</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Questions Ready Indicator -->
+  <div class="questions-ready-box" *ngIf="questionsReady">
+    <span class="material-symbols-outlined">task_alt</span>
+    <div>
+      <strong>{{ questionCount }} Questions Ready</strong>
+      <small class="label-caps">AI-generated questions loaded and cached for your session</small>
+    </div>
+  </div>
+
+  <!-- Error Details -->
+  <div class="error-box" *ngIf="errorDetails">
+    <span class="material-symbols-outlined">info</span>
+    {{ errorDetails }}
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-row">
+    <button
+      type="button"
+      class="proceed-button label-caps"
+      [disabled]="hasCriticalFailure || questionsChecking"
+      (click)="proceedToSession()"
+    >
+      <span>{{ allPassed ? 'Begin Interview' : 'Proceed Anyway' }}</span>
+      <span class="material-symbols-outlined">arrow_forward</span>
+    </button>
+
+    <button
+      type="button"
+      class="retry-button label-caps"
+      *ngIf="hasCriticalFailure"
+      (click)="retryChecks()"
+    >
+      <span class="material-symbols-outlined">refresh</span>
+      Retry Checks
+    </button>
+
+    <button
+      type="button"
+      class="back-button label-caps"
+      routerLink="/interviews/start"
+    >
+      <span class="material-symbols-outlined">arrow_back</span>
+      Back to Setup
+    </button>
+  </div>
+
+  <!-- All Systems Go -->
+  <div class="all-clear-banner" *ngIf="allPassed && questionsReady">
+    <div class="all-clear-dot"></div>
+    <span class="label-caps">All Systems Operational — Ready to Begin</span>
+  </div>
+</main>
+
+<footer class="setup-footer">
+  <span class="label-caps">&#169; 2026 THE INTERVIEW - ALL RIGHTS RESERVED</span>
+  <div>
+    <a>Privacy</a>
+    <a>System Status</a>
+  </div>
+</footer>

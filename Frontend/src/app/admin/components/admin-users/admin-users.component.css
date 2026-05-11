@@ -82,29 +82,64 @@
   padding: 1.5rem 0.5rem;
   border-bottom: 1px solid var(--color-outline);
   color: rgba(26, 26, 26, 0.72);
-  font-size: 0.875rem;
+  font-size: 1rem;
   vertical-align: middle;
 }
 .data-table tr:hover td { color: var(--color-primary); }
 
-.id-cell { opacity: 0.48; font-size: 0.75rem; }
+.id-cell { opacity: 0.48; font-size: 0.8rem; }
 .name-cell { font-weight: 700; color: var(--color-primary); }
-.email-cell { opacity: 0.7; }
-.date-cell { opacity: 0.48; font-size: 0.75rem; }
+.email-cell { opacity: 0.7; font-size: 0.95rem; }
+.date-cell { opacity: 0.48; font-size: 0.8rem; }
 
-/* ── Inline Role Select ── */
-.role-select {
+/* ── Role Badge ── */
+.role-badge {
   font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  background: transparent;
-  border: 1px solid var(--color-outline);
-  padding: 0.3rem 1.5rem 0.3rem 0.5rem;
+  padding: 0.35rem 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(26,26,26,0.15);
+  color: rgba(26,26,26,0.6);
+  background: rgba(26,26,26,0.03);
   cursor: pointer;
+  transition: all 0.25s ease;
 }
-.role-select:focus { border-color: var(--color-primary); outline: none; }
+.role-badge:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(26,26,26,0.06);
+}
+.role-badge--admin {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+.role-badge--admin:hover {
+  background: transparent;
+  color: var(--color-primary);
+}
+.role-edit-icon {
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.role-badge:hover .role-edit-icon {
+  opacity: 1;
+}
+/* Static self-badge: no hover effects */
+span.role-badge {
+  cursor: default;
+}
+span.role-badge:hover {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
 
 /* ── Premium Toggle ── */
 .premium-toggle { display: flex; align-items: center; gap: 0.75rem; }
@@ -143,6 +178,14 @@
   cursor: pointer; transition: all 0.3s ease;
 }
 .btn-reactivate:hover { background: var(--color-primary); color: #fff; }
+
+/* ── Self Badge ── */
+.self-badge {
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.25rem 0.75rem; background: rgba(26,26,26,0.06);
+  color: rgba(26,26,26,0.5); border-radius: 2px;
+}
 
 /* ── Footer Summary ── */
 .table-footer {

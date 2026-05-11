@@ -110,6 +110,11 @@
         <span class="material-symbols-outlined" [class.spin]="isLoading">refresh</span>
       </button>
       <p class="estimate label-caps">Estimated Duration: 45 Minutes</p>
+      <p class="warmup-status label-caps" *ngIf="warmUpStatus">
+        <span *ngIf="warmUpStatus === 'warming'" class="text-gold">⚡ Pre-generating questions...</span>
+        <span *ngIf="warmUpStatus === 'ready'" style="color: #4caf50;">✓ Questions ready</span>
+        <span *ngIf="warmUpStatus === 'failed'" style="color: rgba(26,26,26,0.4);">Questions will generate on start</span>
+      </p>
     </div>
   </form>
 </main>

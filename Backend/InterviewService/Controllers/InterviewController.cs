@@ -110,6 +110,22 @@ namespace InterviewService.Controllers
         }
 
         /// <summary>
+        /// Generates remaining questions for an in-progress interview.
+        /// Called by the frontend in the background while the user answers the initial batch.
+        /// </summary>
+        [HttpPost("{id}/fetch-more")]
+        public async Task<IActionResult> FetchMore(int id)
+        {
+            return await ExecuteAsync(async () =>
+            {
+                var (userId, _, _) = GetUserDetails();
+                _logger.LogInformation("Incoming fetch-more request for user {UserId} and interview {InterviewId}", userId, id);
+                var result = await _service.FetchMoreQuestionsAsync(userId, id);
+                return Ok(ApiResponse<object>.Ok(result));
+            });
+        }
+
+        /// <summary>
         /// Submits interview answers and calculates the result.
         /// </summary>
         [HttpPost("submit")]

@@ -27,7 +27,16 @@ public class GlobalExceptionMiddleware
     {
         try
         {
+
+
+
+
             await _next(context);
+
+
+
+
+
         }
         catch (AppException ex)
         {

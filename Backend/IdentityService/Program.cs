@@ -52,8 +52,6 @@ builder.Services.AddSwaggerGen(c =>
             new List<string>()
         }
     });
-
-    c.OperationFilter<AuthorizeOperationFilter>();
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -64,6 +62,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddRabbitMqMessaging(builder.Configuration);
 builder.Services.AddHostedService<SubscriptionEventConsumer>();
+builder.Services.AddHostedService<UserNotificationEventConsumer>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var secretKey = jwtSettings["SecretKey"]!;
@@ -90,7 +89,10 @@ var app = builder.Build();
 
 app.UseGlobalExceptionHandling();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 if (app.Environment.IsDevelopment())
 {

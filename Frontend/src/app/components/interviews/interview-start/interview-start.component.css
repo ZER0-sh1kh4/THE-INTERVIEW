@@ -331,6 +331,13 @@
   color: rgba(26, 26, 26, 0.4);
 }
 
+.warmup-status {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
+}
+
 .setup-footer {
   max-width: 1440px;
   margin: 0 auto;

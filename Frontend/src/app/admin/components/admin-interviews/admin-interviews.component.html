@@ -23,7 +23,7 @@
       <select class="filter-select" [(ngModel)]="typeFilter" (change)="applyFilters()">
         <option value="">ALL MODALITIES</option>
         <option value="Technical">TECHNICAL</option>
-        <option value="Behavioral">BEHAVIORAL (HR)</option>
+        <option value="HR">HR</option>
         <option value="Mixed">MIXED METHOD</option>
       </select>
     </div>
@@ -54,7 +54,7 @@
           <td class="name-cell">User #{{ item.userId }}</td>
           <td>{{ item.title || 'Interview Session' }}</td>
           <td class="domain-cell">{{ item.domain }}</td>
-          <td>{{ item.type || 'Technical' }}</td>
+          <td>{{ getInterviewType(item) }}</td>
           <td>
             <span class="status-indicator">
               <span class="status-dot" [class.dot--completed]="item.status === 'Completed'" [class.dot--progress]="item.status === 'InProgress'" [class.dot--flagged]="item.status === 'Flagged'"></span>
@@ -79,7 +79,7 @@
     <div class="detail-grid">
       <div class="detail-item"><span class="detail-label">USER ID</span><span class="detail-value">{{ selectedInterview.userId }}</span></div>
       <div class="detail-item"><span class="detail-label">DOMAIN</span><span class="detail-value">{{ selectedInterview.domain }}</span></div>
-      <div class="detail-item"><span class="detail-label">TYPE</span><span class="detail-value">{{ selectedInterview.type }}</span></div>
+      <div class="detail-item"><span class="detail-label">TYPE</span><span class="detail-value">{{ getInterviewType(selectedInterview) }}</span></div>
       <div class="detail-item"><span class="detail-label">STATUS</span><span class="detail-value">{{ selectedInterview.status }}</span></div>
       <div class="detail-item"><span class="detail-label">TITLE</span><span class="detail-value">{{ selectedInterview.title || 'N/A' }}</span></div>
       <div class="detail-item"><span class="detail-label">DATE</span><span class="detail-value">{{ selectedInterview.createdAt | date:'medium' }}</span></div>

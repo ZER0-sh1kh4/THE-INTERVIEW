@@ -65,7 +65,8 @@ namespace InterviewService.Services
         }
 
         /// <summary>
-        /// Starts an interview and returns question numbers starting from 1 for client usage.
+        /// Starts an interview with LAZY LOADING: returns only the first 3 questions immediately.
+        /// The rest are generated in the background via FetchMoreQuestionsAsync.
         /// Idempotent: if the interview is already InProgress, returns the existing questions.
         /// </summary>
         public async Task<object> BeginInterviewAsync(int userId, bool isPremium, int interviewId)
@@ -78,8 +79,52 @@ namespace InterviewService.Services
                 throw new ValidationAppException("Interview already completed.");
 
             // Idempotent: if already InProgress, return the existing saved questions
+            // and generate remaining if the initial batch was incomplete (lazy loading gap fix)
             if (interview.Status == "InProgress")
             {
+                var totalExpected = ExtractQuestionCount(interview.Domain);
+                var existingCount = await _context.Questions.CountAsync(q => q.InterviewId == interviewId);
+
+                // If we have fewer questions than expected (e.g., initial batch was 3 but user wants 5),
+                // generate the remaining ones inline so the user gets the full set
+                if (existingCount < totalExpected)
+                {
+                    _logger.LogInformation("InProgress interview {Id} has {Existing}/{Expected} questions. Generating remaining inline.",
+                        interviewId, existingCount, totalExpected);
+
+                    var neededMore = totalExpected - existingCount;
+                    var resumePreviousQuestions = await GetPreviousUserQuestionTextsAsync(userId, interview.Domain);
+
+                    // Also exclude already-generated questions for this interview
+                    var existingTexts = await _context.Questions
+                        .Where(q => q.InterviewId == interviewId)
+                        .Select(q => q.Text)
+                        .ToListAsync();
+                    foreach (var txt in existingTexts)
+                        resumePreviousQuestions.Add(NormalizeQuestionText(txt));
+
+                    try
+                    {
+                        var moreQuestions = await BuildInterviewQuestionSetAsync(interview.Domain, interviewId, resumePreviousQuestions, neededMore);
+                        for (var i = 0; i < moreQuestions.Count; i++)
+                        {
+                            moreQuestions[i].OrderIndex = existingCount + i + 1;
+                        }
+
+                        if (moreQuestions.Any())
+                        {
+                            _context.Questions.AddRange(moreQuestions);
+                            await _context.SaveChangesAsync();
+                            _logger.LogInformation("Generated {Count} additional questions inline for interview {Id}.",
+                                moreQuestions.Count, interviewId);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to generate remaining questions inline for interview {Id}. Returning partial set.", interviewId);
+                    }
+                }
+
                 var existingQuestions = await _context.Questions
                     .Where(q => q.InterviewId == interviewId)
                     .OrderBy(q => q.OrderIndex)
@@ -99,15 +144,21 @@ namespace InterviewService.Services
                 return new
                 {
                     InterviewId = interviewId,
-                    Message = "Session resumed. Questions loaded from previous begin call.",
+                    TotalExpected = totalExpected,
+                    Message = existingQuestions.Count >= totalExpected
+                        ? "Session resumed. All questions loaded."
+                        : $"Session resumed. {existingQuestions.Count}/{totalExpected} questions available.",
                     Questions = existingQuestions
                 };
             }
 
+            // Generate ALL requested questions upfront (no more lazy loading of only 3)
+            var requestedCount = ExtractQuestionCount(interview.Domain);
             var previousQuestions = await GetPreviousUserQuestionTextsAsync(userId, interview.Domain);
-            var newQuestions = await BuildInterviewQuestionSetAsync(interview.Domain, interviewId, previousQuestions);
+            var newQuestions = await BuildInterviewQuestionSetAsync(interview.Domain, interviewId, previousQuestions, requestedCount);
+            
             if (!newQuestions.Any()) throw new AppException(
-                "Gemini could not generate interview questions right now. Please try again in a moment.",
+                "Could not generate interview questions right now. Please try again in a moment.",
                 StatusCodes.Status503ServiceUnavailable);
 
             interview.Status = "InProgress";
@@ -131,70 +182,188 @@ namespace InterviewService.Services
                 })
                 .ToList();
 
+            _logger.LogInformation("Begin returned {Count}/{Requested} questions for interview {Id}.",
+                responseQuestions.Count, requestedCount, interviewId);
+
             return new
             {
                 InterviewId = interviewId,
-                Message = "Use the question ids returned here when calling submit. These ids are interview question numbers and start from 1.",
+                TotalExpected = requestedCount,
+                Message = responseQuestions.Count >= requestedCount
+                    ? $"All {requestedCount} questions loaded."
+                    : $"{responseQuestions.Count}/{requestedCount} questions loaded. Some may have been rate-limited.",
                 Questions = responseQuestions
             };
         }
 
         /// <summary>
+        /// Generates remaining questions for an in-progress interview.
+        /// Called by the frontend in the background while the user answers the first batch.
+        /// </summary>
+        public async Task<object> FetchMoreQuestionsAsync(int userId, int interviewId)
+        {
+            var interview = await _context.Interviews.FirstOrDefaultAsync(i => i.Id == interviewId && i.UserId == userId);
+            if (interview == null) throw new NotFoundAppException("Interview not found.");
+            if (interview.Status != "InProgress")
+                throw new ValidationAppException("Interview must be in progress to fetch more questions.");
+
+            var totalExpected = ExtractQuestionCount(interview.Domain);
+            var existingCount = await _context.Questions.CountAsync(q => q.InterviewId == interviewId);
+
+            if (existingCount >= totalExpected)
+            {
+                // Already have all questions — return them
+                var allQuestions = await _context.Questions
+                    .Where(q => q.InterviewId == interviewId)
+                    .OrderBy(q => q.OrderIndex)
+                    .Select(q => new QuestionResponseDto
+                    {
+                        Id = q.OrderIndex,
+                        Text = q.Text,
+                        QuestionType = q.QuestionType,
+                        OptionA = q.OptionA,
+                        OptionB = q.OptionB,
+                        OptionC = q.OptionC,
+                        OptionD = q.OptionD,
+                        OrderIndex = q.OrderIndex
+                    })
+                    .ToListAsync();
+
+                return new { InterviewId = interviewId, TotalExpected = totalExpected, Questions = allQuestions };
+            }
+
+            // Generate the remaining questions
+            var neededMore = totalExpected - existingCount;
+            var previousQuestions = await GetPreviousUserQuestionTextsAsync(userId, interview.Domain);
+
+            // Also exclude already-generated questions for this interview
+            var existingTexts = await _context.Questions
+                .Where(q => q.InterviewId == interviewId)
+                .Select(q => q.Text)
+                .ToListAsync();
+            foreach (var txt in existingTexts)
+                previousQuestions.Add(NormalizeQuestionText(txt));
+
+            var moreQuestions = await BuildInterviewQuestionSetAsync(interview.Domain, interviewId, previousQuestions, neededMore);
+
+            // Re-index from existing count
+            for (var i = 0; i < moreQuestions.Count; i++)
+            {
+                moreQuestions[i].OrderIndex = existingCount + i + 1;
+            }
+
+            if (moreQuestions.Any())
+            {
+                _context.Questions.AddRange(moreQuestions);
+                await _context.SaveChangesAsync();
+            }
+
+            _logger.LogInformation("Fetch-more generated {Count} additional questions for interview {Id}. Total now: {Total}/{Expected}",
+                moreQuestions.Count, interviewId, existingCount + moreQuestions.Count, totalExpected);
+
+            // Return ALL questions (initial + new)
+            var fullSet = await _context.Questions
+                .Where(q => q.InterviewId == interviewId)
+                .OrderBy(q => q.OrderIndex)
+                .Select(q => new QuestionResponseDto
+                {
+                    Id = q.OrderIndex,
+                    Text = q.Text,
+                    QuestionType = q.QuestionType,
+                    OptionA = q.OptionA,
+                    OptionB = q.OptionB,
+                    OptionC = q.OptionC,
+                    OptionD = q.OptionD,
+                    OrderIndex = q.OrderIndex
+                })
+                .ToListAsync();
+
+            return new { InterviewId = interviewId, TotalExpected = totalExpected, Questions = fullSet };
+        }
+
+        /// <summary>
         /// Pre-generates questions for a domain and saves them to the global JIT pool.
-        /// Called by the frontend to reduce startup latency.
+        /// Uses NormalizeCacheDomain for broader cache hits.
         /// </summary>
         public async Task<int> WarmUpCacheAsync(string domain, int targetCount = 3)
         {
             if (string.IsNullOrWhiteSpace(domain)) return 0;
 
-            // Check if we already have enough questions in the global pool for this specific domain
-            var existingCount = await _context.GlobalInterviewQuestions.CountAsync(q => q.Domain == domain);
+            var cacheDomain = NormalizeCacheDomain(domain);
+
+            // Check if we already have enough questions in the global pool
+            var existingCount = await _context.GlobalInterviewQuestions.CountAsync(q => q.Domain == cacheDomain);
             if (existingCount >= targetCount) return existingCount;
 
             try
             {
                 var needed = targetCount - existingCount;
-                // Generate a small batch of 3 questions specifically for the warm-up
-                var aiQuestions = await GenerateAiQuestionsAsync(domain, 0, Math.Min(needed, 3));
+                var aiQuestions = await GenerateAiQuestionsAsync(cacheDomain, 0, Math.Min(needed, 3));
                 return existingCount + aiQuestions.Count;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Warm-up failed for domain {Domain}", domain);
+                _logger.LogWarning(ex, "Warm-up failed for domain {Domain}", cacheDomain);
                 return existingCount;
             }
         }
 
         /// <summary>
-        /// Builds the question set using validated admin questions first, then Gemini-generated questions.
-        /// No static or local fallback questions are allowed.
+        /// Builds the question set using a 3-tier fallback: Admin → JIT Pool (broadened search) → AI Generation.
+        /// Accepts a target count parameter for lazy loading support.
         /// </summary>
-        private async Task<List<Question>> BuildInterviewQuestionSetAsync(string domain, int interviewId, HashSet<string> previousQuestions)
+        private async Task<List<Question>> BuildInterviewQuestionSetAsync(string domain, int interviewId, HashSet<string> previousQuestions, int? targetOverride = null)
         {
-            var questionCount = ExtractQuestionCount(domain);
+            var questionCount = targetOverride ?? ExtractQuestionCount(domain);
+            var cacheDomain = NormalizeCacheDomain(domain);
             var selectedQuestions = new List<Question>();
 
             // 1. Try Admin Curated Questions First
             var adminQuestions = await GetAdminCuratedQuestionsAsync(domain, interviewId, previousQuestions, questionCount);
             selectedQuestions.AddRange(adminQuestions);
 
-            // 2. JIT Check: Try Global Pool for the remaining questions
+            // 2. JIT Check: Broadened multi-level Global Pool search
             if (selectedQuestions.Count < questionCount)
             {
                 try
                 {
                     var neededFromPool = questionCount - selectedQuestions.Count;
-                    
-                    // IMPROVED: Try to match by partial domain (Role or Tech) if the specific domain has no questions
-                    var role = domain.Split('|').FirstOrDefault()?.Trim();
-                    
+                    var domainParts = domain.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    var role = domainParts.FirstOrDefault() ?? "";
+                    var techs = domainParts.Length > 5 ? domainParts[5].Split(',', StringSplitOptions.TrimEntries) : Array.Empty<string>();
+                    var primaryTech = techs.FirstOrDefault() ?? "";
+
+                    // Level 1: Exact normalized domain match
                     var poolQuestions = await _context.GlobalInterviewQuestions
-                        .Where(q => q.Domain == domain || (role != null && q.Domain.Contains(role)))
-                        .OrderBy(q => Guid.NewGuid()) // Random shuffle
+                        .Where(q => q.Domain == cacheDomain || q.Domain == domain)
+                        .OrderBy(q => Guid.NewGuid())
                         .Take(neededFromPool * 3)
                         .ToListAsync();
 
+                    // Level 2: Role-based partial match (e.g., "Software Engineer")
+                    if (poolQuestions.Count < neededFromPool && !string.IsNullOrWhiteSpace(role))
+                    {
+                        var roleMatches = await _context.GlobalInterviewQuestions
+                            .Where(q => q.Domain.Contains(role))
+                            .OrderBy(q => Guid.NewGuid())
+                            .Take(neededFromPool * 3)
+                            .ToListAsync();
+                        poolQuestions.AddRange(roleMatches);
+                    }
+
+                    // Level 3: Technology-based match (e.g., "Angular")
+                    if (poolQuestions.Count < neededFromPool && !string.IsNullOrWhiteSpace(primaryTech))
+                    {
+                        var techMatches = await _context.GlobalInterviewQuestions
+                            .Where(q => q.Domain.Contains(primaryTech) || q.Subtopic.Contains(primaryTech))
+                            .OrderBy(q => Guid.NewGuid())
+                            .Take(neededFromPool * 3)
+                            .ToListAsync();
+                        poolQuestions.AddRange(techMatches);
+                    }
+
                     var validPool = poolQuestions
+                        .DistinctBy(q => q.Id)
                         .Where(q => !previousQuestions.Contains(NormalizeQuestionText(q.Text)))
                         .Take(neededFromPool)
                         .Select(q => new Question
@@ -209,6 +378,8 @@ namespace InterviewService.Services
                         .ToList();
 
                     selectedQuestions.AddRange(validPool);
+                    _logger.LogInformation("JIT pool returned {Count} questions (broadened search). Need {More} more.",
+                        validPool.Count, questionCount - selectedQuestions.Count);
                 }
                 catch (Exception ex)
                 {
@@ -219,9 +390,16 @@ namespace InterviewService.Services
             // 3. AI Generation: If still not enough, generate fresh questions
             if (selectedQuestions.Count < questionCount)
             {
-                var neededFromAi = questionCount - selectedQuestions.Count;
-                var aiQuestions = await GenerateAiQuestionsAsync(domain, interviewId, neededFromAi);
-                selectedQuestions.AddRange(aiQuestions);
+                try
+                {
+                    var neededFromAi = questionCount - selectedQuestions.Count;
+                    var aiQuestions = await GenerateAiQuestionsAsync(cacheDomain, interviewId, neededFromAi);
+                    selectedQuestions.AddRange(aiQuestions);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "AI generation failed (likely rate limited). Proceeding with {Count} questions from admin/pool.", selectedQuestions.Count);
+                }
             }
 
             var finalQuestions = selectedQuestions
@@ -230,11 +408,16 @@ namespace InterviewService.Services
                 .Take(questionCount)
                 .ToList();
 
-            if (finalQuestions.Count < questionCount)
+            if (finalQuestions.Count == 0)
             {
                 throw new AppException(
-                    "Unable to generate enough unique, interviewer-quality questions. Please try again.",
+                    "No questions available. The AI is rate-limited and no admin/pool questions match this domain. Please wait a minute and try again.",
                     StatusCodes.Status503ServiceUnavailable);
+            }
+
+            if (finalQuestions.Count < questionCount)
+            {
+                _logger.LogWarning("Only {Actual}/{Requested} questions available. Proceeding with partial set.", finalQuestions.Count, questionCount);
             }
 
             for (var index = 0; index < finalQuestions.Count; index++)
@@ -247,18 +430,28 @@ namespace InterviewService.Services
         }
 
         /// <summary>
-        /// Returns admin-curated interview questions when they pass the same quality and duplicate checks as AI questions.
+        /// Returns admin-curated interview questions.
+        /// Relaxed matching: splits compound terms (like "Angular, TypeScript") into individual tokens.
+        /// Preserves original question type and options from the DB.
         /// </summary>
         private async Task<List<Question>> GetAdminCuratedQuestionsAsync(string domain, int interviewId, HashSet<string> previousQuestions, int count)
         {
-            var profileTerms = domain.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            // Split domain AND expand compound terms like "Angular, TypeScript" into ["Angular", "TypeScript"]
+            var profileTerms = domain
+                .Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .SelectMany(term => term.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                .Where(t => !Regex.IsMatch(t, @"^\d+\s+Questions$", RegexOptions.IgnoreCase)) // Skip "5 Questions"
+                .ToArray();
+
             var curatedQuestions = await _context.Questions
                 .Where(q => q.InterviewId == 0 && q.Source == "Admin")
                 .OrderBy(q => q.OrderIndex)
                 .ToListAsync();
 
             return curatedQuestions
-                .Where(q => profileTerms.Length == 0 || profileTerms.Any(term => q.Subtopic.Contains(term, StringComparison.OrdinalIgnoreCase) || q.Text.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                .Where(q => profileTerms.Length == 0 || profileTerms.Any(term =>
+                    (q.Subtopic ?? "").Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    (q.Text ?? "").Contains(term, StringComparison.OrdinalIgnoreCase)))
                 .Where(q => IsHighQualityInterviewQuestion(q.Text))
                 .Where(q => !previousQuestions.Contains(NormalizeQuestionText(q.Text)))
                 .Take(count)
@@ -266,8 +459,12 @@ namespace InterviewService.Services
                 {
                     InterviewId = interviewId,
                     Text = q.Text,
-                    QuestionType = "Subjective",
+                    QuestionType = q.QuestionType ?? "Subjective", // Preserve original type (MCQ, Subjective, etc.)
                     CorrectAnswer = q.CorrectAnswer,
+                    OptionA = q.OptionA,
+                    OptionB = q.OptionB,
+                    OptionC = q.OptionC,
+                    OptionD = q.OptionD,
                     Subtopic = q.Subtopic,
                     Source = "Admin"
                 })
@@ -284,9 +481,11 @@ namespace InterviewService.Services
         private async Task<List<Question>> GenerateAiQuestionsAsync(string domain, int interviewId, int questionCount)
         {
             var apiKey = _config["Gemini:ApiKey"];
-            var model = NormalizeGeminiModel(_config["Gemini:Model"] ?? "gemini-2.5-flash");
+            var model = NormalizeGeminiModel(_config["Gemini:Model"] ?? "gemini-2.0-flash-lite");
 
-            if (string.IsNullOrWhiteSpace(apiKey) || apiKey == "YOUR_KEY")
+            if (string.IsNullOrWhiteSpace(apiKey) ||
+                apiKey.Contains("YOUR", StringComparison.OrdinalIgnoreCase) ||
+                apiKey.Contains("PASTE", StringComparison.OrdinalIgnoreCase))
             {
                 throw new AppException("Gemini API key is not configured.", StatusCodes.Status503ServiceUnavailable);
             }
@@ -298,18 +497,28 @@ namespace InterviewService.Services
                                     "CI/CD & DevOps", "Database Design", "API Design & Integration", "Error Handling & Resilience" };
             var rng = new Random();
 
-            // Polly retry policy: handles 429 (rate limit) and transient failures
+            // Polly retry policy: handles 429 (rate limit) AND 500+ (transient failures)
             var retryPolicy = Polly.Policy
                 .Handle<HttpRequestException>()
                 .Or<TaskCanceledException>()
-                .OrResult<HttpResponseMessage>(r => r.StatusCode == (System.Net.HttpStatusCode)429 || (int)r.StatusCode >= 500)
+                .OrResult<HttpResponseMessage>(r => (int)r.StatusCode >= 500 || r.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                 .WaitAndRetryAsync(
                     retryCount: 3,
-                    sleepDurationProvider: attempt => TimeSpan.FromMilliseconds(500 * Math.Pow(2, attempt - 1)),
-                    onRetry: (outcome, delay, attempt, _) =>
+                    sleepDurationProvider: (attempt, outcome, _) =>
                     {
-                        _logger.LogWarning("Gemini retry #{Attempt} after {Delay}ms. Status: {Status}",
-                            attempt, delay.TotalMilliseconds, outcome.Result?.StatusCode.ToString() ?? outcome.Exception?.Message);
+                        // If 429, check Retry-After header first
+                        if (outcome?.Result?.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                        {
+                            if (outcome.Result.Headers.RetryAfter?.Delta is TimeSpan retryAfter)
+                                return retryAfter + TimeSpan.FromSeconds(1); // Add 1s buffer
+                        }
+                        return TimeSpan.FromSeconds(Math.Pow(3, attempt)); // 3s, 9s, 27s
+                    },
+                    onRetryAsync: (outcome, delay, attempt, _) =>
+                    {
+                        _logger.LogWarning("Gemini retry #{Attempt} after {Delay}s. Status: {Status}",
+                            attempt, delay.TotalSeconds, outcome.Result?.StatusCode.ToString() ?? outcome.Exception?.Message);
+                        return Task.CompletedTask;
                     });
 
             int loopAttempts = 0;
@@ -326,11 +535,31 @@ namespace InterviewService.Services
                     // Sync API Pattern: pass key in URL
                     var url = $"https://generativelanguage.googleapis.com/v1beta/{model}:generateContent?key={apiKey}";
 
-                    var prompt = $"You are an Elite Technical Interviewer. Generate exactly {needed} concise scenario-based mock interview questions for: {domain}. " +
-                                 $"Focus on this sub-scenario: {scenario}. " +
-                                 "Rules: Each question MUST be 2-3 lines maximum (under 50 words). Be direct and specific. " +
-                                 "Use format: 'How would you [action] when [specific situation]?' " +
-                                 "NO long preambles. NO multi-part questions. NO theory-only questions. NO 'What is X'. One clear scenario per question.";
+                    var prompt = $$"""
+You are an elite technical interviewer.
+Generate exactly {{needed}} concise, practical mock interview questions for this interview profile:
+{{domain}}
+
+Focus area: {{scenario}}.
+
+Return ONLY valid JSON with this exact shape:
+{
+  "questions": [
+    {
+      "question": "string",
+      "subtopic": "string",
+      "idealAnswer": "string"
+    }
+  ]
+}
+
+Rules:
+- Generate exactly {{needed}} items.
+- Each question must be under 50 words.
+- Use scenario-based questions, not theory definitions.
+- Do not use markdown, code fences, comments, or extra text.
+- Do not ask multi-part questions.
+""";
 
                     // Response schema in generationConfig — guarantees perfect JSON structure
                     var requestBody = new
@@ -342,20 +571,20 @@ namespace InterviewService.Services
                             temperature = 0.9,
                             responseSchema = new
                             {
-                                type = "OBJECT",
+                                type = "object",
                                 properties = new
                                 {
                                     questions = new
                                     {
-                                        type = "ARRAY",
+                                        type = "array",
                                         items = new
                                         {
-                                            type = "OBJECT",
+                                            type = "object",
                                             properties = new
                                             {
-                                                question = new { type = "STRING" },
-                                                subtopic = new { type = "STRING" },
-                                                idealAnswer = new { type = "STRING" }
+                                                question = new { type = "string" },
+                                                subtopic = new { type = "string" },
+                                                idealAnswer = new { type = "string" }
                                             },
                                             required = new[] { "question", "subtopic", "idealAnswer" }
                                         }
@@ -379,6 +608,14 @@ namespace InterviewService.Services
                     if (!response.IsSuccessStatusCode)
                     {
                         _logger.LogWarning("Gemini batch failed with status {Status} after retries.", response.StatusCode);
+
+                        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                        {
+                            // STOP the loop immediately on rate limit — don't keep hammering the API
+                            _logger.LogError("Gemini rate limit (429) hit. Stopping generation loop.");
+                            break;
+                        }
+
                         currentBatchSize = 3; // Fallback to smaller batch
                         continue;
                     }
@@ -389,22 +626,24 @@ namespace InterviewService.Services
                     // Safe JSON Extraction
                     if (!doc.RootElement.TryGetProperty("candidates", out var candidates) || candidates.GetArrayLength() == 0)
                     {
-                        _logger.LogWarning("AI Safety Filter triggered or empty response.");
+                        _logger.LogWarning("Gemini returned no candidates. Response: {Response}", json);
                         currentBatchSize = 3; // Fallback to smaller batch
                         continue; 
                     }
 
-                    var text = candidates[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
+                    var text = ExtractGeminiText(candidates[0]);
 
                     if (string.IsNullOrWhiteSpace(text)) 
                     {
+                        _logger.LogWarning("Gemini candidate did not contain text. Response: {Response}", json);
                         currentBatchSize = 3;
                         continue;
                     }
 
-                    var aiData = JsonSerializer.Deserialize<AiQuestionList>(text, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var aiData = ParseAiQuestionList(text);
                     if (aiData?.Questions == null || !aiData.Questions.Any()) 
                     {
+                        _logger.LogWarning("Gemini response could not be parsed into questions. Text: {Text}", text);
                         currentBatchSize = 3;
                         continue;
                     }
@@ -413,11 +652,13 @@ namespace InterviewService.Services
                     try
                     {
                         var globalQuestions = aiData.Questions
-                            .Where(q => !string.IsNullOrWhiteSpace(q.Question))
+                            .Where(q => IsHighQualityInterviewQuestion(q.Question))
+                            .GroupBy(q => NormalizeQuestionText(q.Question))
+                            .Select(g => g.First())
                             .Select(q => new GlobalInterviewQuestion
                             {
                                 Domain = domain,
-                                Text = q.Question ?? "",
+                                Text = q.Question.Trim(),
                                 Subtopic = q.Subtopic ?? "General",
                                 IdealAnswer = q.IdealAnswer ?? "",
                                 QuestionType = "Subjective",
@@ -435,11 +676,13 @@ namespace InterviewService.Services
                     }
 
                     var batchQuestions = aiData.Questions
-                        .Where(q => !string.IsNullOrWhiteSpace(q.Question))
+                        .Where(q => IsHighQualityInterviewQuestion(q.Question))
+                        .GroupBy(q => NormalizeQuestionText(q.Question))
+                        .Select(g => g.First())
                         .Select(q => new Question
                         {
                             InterviewId = interviewId,
-                            Text = q.Question ?? "",
+                            Text = q.Question.Trim(),
                             QuestionType = "Subjective",
                             CorrectAnswer = q.IdealAnswer ?? "",
                             Subtopic = q.Subtopic ?? "General",
@@ -459,10 +702,60 @@ namespace InterviewService.Services
 
             if (allQuestions.Count == 0)
             {
-                throw new AppException("Gemini failed to generate questions after all batch attempts. Please try again.", StatusCodes.Status503ServiceUnavailable);
+                _logger.LogWarning("Gemini returned 0 questions after all batch attempts. Returning empty list.");
+                return new List<Question>();
             }
 
             return allQuestions.Take(questionCount).ToList();
+        }
+
+        private static string? ExtractGeminiText(JsonElement candidate)
+        {
+            if (!candidate.TryGetProperty("content", out var content) ||
+                !content.TryGetProperty("parts", out var parts) ||
+                parts.ValueKind != JsonValueKind.Array)
+            {
+                return null;
+            }
+
+            foreach (var part in parts.EnumerateArray())
+            {
+                if (part.TryGetProperty("text", out var textElement))
+                {
+                    var text = textElement.GetString();
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        return text;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static AiQuestionList? ParseAiQuestionList(string text)
+        {
+            var cleaned = text.Replace("```json", "", StringComparison.OrdinalIgnoreCase)
+                .Replace("```", "")
+                .Trim();
+
+            var jsonStart = cleaned.IndexOf('{');
+            var jsonEnd = cleaned.LastIndexOf('}');
+            if (jsonStart >= 0 && jsonEnd > jsonStart)
+            {
+                cleaned = cleaned.Substring(jsonStart, jsonEnd - jsonStart + 1);
+            }
+
+            try
+            {
+                return JsonSerializer.Deserialize<AiQuestionList>(
+                    cleaned,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private class AiQuestionList { public List<AiQuestionItem> Questions { get; set; } = new(); }
@@ -710,6 +1003,17 @@ namespace InterviewService.Services
                 : 5;
         }
 
+        /// <summary>
+        /// Strips the question count from the domain string so that JIT pool lookups
+        /// are shared across sessions requesting different question counts.
+        /// e.g. "Software Engineer | 1-3 years | Technical | Medium | 5 Questions | Angular, TypeScript"
+        ///   → "Software Engineer | 1-3 years | Technical | Medium | Angular, TypeScript"
+        /// </summary>
+        private static string NormalizeCacheDomain(string domain)
+        {
+            return Regex.Replace(domain, @"\s*\|?\s*\d+\s+Questions\s*\|?\s*", " | ", RegexOptions.IgnoreCase).Trim(' ', '|').Trim();
+        }
+
         private static string NormalizeGeminiModel(string model)
         {
             var trimmed = model.Trim();
@@ -766,7 +1070,7 @@ namespace InterviewService.Services
             List<InterviewAnswerSubmission> submittedAnswers)
         {
             var apiKey = _config["Gemini:ApiKey"];
-            var model = NormalizeGeminiModel(_config["Gemini:Model"] ?? "gemini-2.5-flash");
+            var model = NormalizeGeminiModel(_config["Gemini:Model"] ?? "gemini-2.0-flash-lite");
             if (string.IsNullOrWhiteSpace(apiKey) || apiKey == "YOUR_KEY")
             {
                 throw new AppException(

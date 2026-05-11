@@ -8,7 +8,7 @@ namespace AssessmentService.DTOs
         [Required]
         public string Domain { get; set; } = string.Empty;
 
-        // FRESHLY ADDED: frontend can request exam size without changing database schema.
+        // frontend can request exam size without changing database schema.
         [Range(1, 60)]
         public int QuestionCount { get; set; } = 10;
 

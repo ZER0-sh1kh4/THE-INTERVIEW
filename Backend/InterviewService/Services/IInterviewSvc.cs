@@ -10,6 +10,7 @@ namespace InterviewService.Services
     {
         Task<Interview> StartInterviewAsync(int userId, bool isPremium, StartInterviewRequest request);
         Task<object> BeginInterviewAsync(int userId, bool isPremium, int interviewId);
+        Task<object> FetchMoreQuestionsAsync(int userId, int interviewId);
         Task<int> WarmUpCacheAsync(string domain, int targetCount = 3);
         Task<object?> SubmitInterviewAsync(int userId, bool isPremium, SubmitInterviewRequest request);
         Task<IEnumerable<Interview>> GetMyInterviewsAsync(int userId);

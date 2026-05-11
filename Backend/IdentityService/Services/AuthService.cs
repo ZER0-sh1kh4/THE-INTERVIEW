@@ -41,20 +41,7 @@ namespace IdentityService.Services
                 var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
                 if (existingUser != null)
                 {
-                    existingUser.FullName = request.FullName;
-                    existingUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-                    existingUser.IsActive = true;
-                    await _context.SaveChangesAsync();
-
-                    _logger.LogInformation("Existing user {Email} was updated through registration flow", existingUser.Email);
-
-                    var existingToken = GenerateJwtToken(existingUser);
-                    return new AuthResponse
-                    {
-                        UserId = existingUser.Id,
-                        Token = existingToken,
-                        Message = "Existing user updated successfully"
-                    };
+                    throw new AppException("Email already exists.", StatusCodes.Status400BadRequest);
                 }
 
                 var user = new User

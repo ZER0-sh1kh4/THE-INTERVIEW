@@ -44,6 +44,7 @@ export interface InterviewQuestion {
 /** Begin response wraps the generated or seeded questions for a session. */
 export interface BeginInterviewResponse {
   interviewId: number;
+  totalExpected: number;
   message: string;
   questions: InterviewQuestion[];
 }

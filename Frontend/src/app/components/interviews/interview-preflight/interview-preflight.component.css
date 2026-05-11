@@ -1,0 +1,430 @@
+/* Purpose: Styles the interview pre-flight system validation page. */
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(26, 26, 26, 0.035) 1px, transparent 1px) 0 0 / 8.333% 100%,
+    var(--color-background);
+  color: var(--color-primary);
+}
+
+.side-label {
+  position: fixed;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  color: rgba(26, 26, 26, 0.2);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  z-index: 1;
+}
+
+.preflight-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 5rem 2rem 6rem;
+}
+
+.preflight-header {
+  margin-bottom: 4rem;
+}
+
+.text-gold {
+  color: var(--color-secondary);
+}
+
+.preflight-header h1 {
+  margin: 1rem 0 1.5rem;
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.header-subtitle {
+  margin: 0 0 2rem;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: rgba(26, 26, 26, 0.55);
+  max-width: 600px;
+}
+
+.header-rule {
+  height: 1px;
+  background: rgba(26, 26, 26, 0.1);
+}
+
+/* ─── Check Rows ─────────────────────────────────────────────────────── */
+
+.checks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 3rem;
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 3rem 3rem 1fr auto;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.5rem;
+  border: 1px solid rgba(26, 26, 26, 0.08);
+  border-bottom: none;
+  background: rgba(255, 255, 255, 0.5);
+  transition: all 0.4s ease;
+}
+
+.check-row:last-child {
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.check-row.pass {
+  background: rgba(76, 175, 80, 0.04);
+  border-color: rgba(76, 175, 80, 0.15);
+}
+
+.check-row.pass + .check-row {
+  border-top-color: rgba(76, 175, 80, 0.15);
+}
+
+.check-row.fail {
+  background: rgba(186, 26, 26, 0.04);
+  border-color: rgba(186, 26, 26, 0.2);
+}
+
+.check-row.warn {
+  background: rgba(212, 175, 55, 0.04);
+  border-color: rgba(212, 175, 55, 0.2);
+}
+
+.check-row.checking {
+  background: rgba(212, 175, 55, 0.06);
+  border-color: rgba(212, 175, 55, 0.18);
+}
+
+.check-index {
+  color: rgba(26, 26, 26, 0.2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.check-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(26, 26, 26, 0.04);
+  transition: all 0.3s ease;
+}
+
+.check-row.pass .check-icon {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.check-row.fail .check-icon {
+  background: rgba(186, 26, 26, 0.1);
+  color: #ba1a1a;
+}
+
+.check-row.warn .check-icon {
+  background: rgba(212, 175, 55, 0.12);
+  color: #d4af37;
+}
+
+.check-row.checking .check-icon {
+  background: rgba(212, 175, 55, 0.12);
+  color: #d4af37;
+}
+
+.check-row.pending .check-icon {
+  color: rgba(26, 26, 26, 0.2);
+}
+
+.check-icon .material-symbols-outlined {
+  font-size: 1.4rem;
+}
+
+.check-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.check-info strong {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.check-info small {
+  color: rgba(26, 26, 26, 0.45);
+  font-size: 0.68rem;
+}
+
+.check-badge {
+  padding: 0.4rem 1rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.check-row.pass .check-badge {
+  color: #4caf50;
+  border-color: rgba(76, 175, 80, 0.2);
+  background: rgba(76, 175, 80, 0.06);
+}
+
+.check-row.fail .check-badge {
+  color: #ba1a1a;
+  border-color: rgba(186, 26, 26, 0.2);
+  background: rgba(186, 26, 26, 0.06);
+}
+
+.check-row.warn .check-badge {
+  color: #d4af37;
+  border-color: rgba(212, 175, 55, 0.2);
+  background: rgba(212, 175, 55, 0.06);
+}
+
+.check-row.checking .check-badge {
+  color: #d4af37;
+}
+
+.check-row.pending .check-badge {
+  color: rgba(26, 26, 26, 0.25);
+}
+
+/* ─── Questions Ready Box ────────────────────────────────────────────── */
+
+.questions-ready-box {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(76, 175, 80, 0.25);
+  background: rgba(76, 175, 80, 0.06);
+  animation: slideIn 0.5s ease-out;
+}
+
+.questions-ready-box .material-symbols-outlined {
+  font-size: 2rem;
+  color: #4caf50;
+}
+
+.questions-ready-box strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #2e7d32;
+  margin-bottom: 0.2rem;
+}
+
+.questions-ready-box small {
+  color: rgba(46, 125, 50, 0.7);
+  font-size: 0.68rem;
+}
+
+/* ─── Error Box ──────────────────────────────────────────────────────── */
+
+.error-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(186, 26, 26, 0.2);
+  background: rgba(186, 26, 26, 0.04);
+  color: #ba1a1a;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.error-box .material-symbols-outlined {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+/* ─── Action Buttons ─────────────────────────────────────────────────── */
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+.proceed-button {
+  min-width: 260px;
+  min-height: 4.5rem;
+  padding: 0 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: var(--color-primary);
+  color: var(--color-background);
+  letter-spacing: 0.28em;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.proceed-button:hover:not(:disabled) {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+.proceed-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.retry-button,
+.back-button {
+  min-height: 4.5rem;
+  padding: 0 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid rgba(26, 26, 26, 0.15);
+  background: transparent;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  color: rgba(26, 26, 26, 0.7);
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover,
+.back-button:hover {
+  border-color: rgba(26, 26, 26, 0.4);
+  color: #1a1a1a;
+}
+
+.retry-button .material-symbols-outlined,
+.back-button .material-symbols-outlined {
+  font-size: 1.2rem;
+}
+
+/* ─── All Clear Banner ───────────────────────────────────────────────── */
+
+.all-clear-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 2rem;
+  border: 1px solid rgba(76, 175, 80, 0.18);
+  background: rgba(76, 175, 80, 0.04);
+  animation: slideIn 0.6s ease-out;
+}
+
+.all-clear-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: #4caf50;
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.2);
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.all-clear-banner .label-caps {
+  color: #2e7d32;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────── */
+
+.setup-footer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.1);
+  color: rgba(26, 26, 26, 0.45);
+}
+
+.setup-footer div {
+  display: flex;
+  gap: 2rem;
+}
+
+.setup-footer a {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────── */
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.2); }
+  50% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0.05); }
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .side-label {
+    display: none;
+  }
+
+  .preflight-shell {
+    padding: 3rem 1rem 4rem;
+  }
+
+  .check-row {
+    grid-template-columns: 2.5rem 1fr auto;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .check-index {
+    display: none;
+  }
+
+  .action-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .proceed-button,
+  .retry-button,
+  .back-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .setup-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

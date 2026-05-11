@@ -15,10 +15,16 @@ import { MCQQuestion } from '../../models/admin.models';
 export class AdminQuestionsComponent implements OnInit {
   questions: MCQQuestion[] = [];
   filteredQuestions: MCQQuestion[] = [];
+  paginatedQuestions: MCQQuestion[] = [];
   domains: string[] = [];
   domainFilter = '';
   isLoading = true;
   error = '';
+
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
 
   // Create / Edit drawer
   showModal = false;
@@ -70,6 +76,31 @@ export class AdminQuestionsComponent implements OnInit {
     this.filteredQuestions = this.questions.filter(q =>
       !this.domainFilter || q.domain === this.domainFilter
     );
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  private updatePagination(): void {
+    this.totalPages = Math.max(1, Math.ceil(this.filteredQuestions.length / this.pageSize));
+    if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.paginatedQuestions = this.filteredQuestions.slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
+  }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(this.totalPages, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
   }
 
   /** True when the admin has chosen to create a brand-new domain. */

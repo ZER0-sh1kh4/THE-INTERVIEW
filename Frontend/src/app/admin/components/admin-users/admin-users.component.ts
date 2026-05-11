@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminNavbarComponent } from '../admin-navbar/admin-navbar.component';
 import { AdminService } from '../../services/admin.service';
 import { AdminUser } from '../../models/admin.models';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -25,7 +26,11 @@ export class AdminUsersComponent implements OnInit {
   deleteTarget: AdminUser | null = null;
   isDeleting = false;
 
-  constructor(private adminService: AdminService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private adminService: AdminService,
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -58,16 +63,20 @@ export class AdminUsersComponent implements OnInit {
     );
   }
 
-  /** Inline role change — requires confirmation */
-  onRoleChange(user: AdminUser, event: Event): void {
-    const newRole = (event.target as HTMLSelectElement).value;
-    if (confirm(`Are you sure you want to change ${user.email} to ${newRole}?`)) {
+  /** Toggle role between Admin and Candidate — requires confirmation */
+  onRoleToggle(user: AdminUser): void {
+    const newRole = user.role === 'Admin' ? 'Candidate' : 'Admin';
+    const action = newRole === 'Admin' ? 'promote to ADMIN' : 'demote to CANDIDATE';
+    if (confirm(`Are you sure you want to ${action} ${user.fullName || user.email}?`)) {
       this.adminService.updateUserRole(user.id, newRole).subscribe({
-        next: () => { user.role = newRole; },
-        error: () => { /* Revert on failure */ (event.target as HTMLSelectElement).value = user.role; }
+        next: () => {
+          user.role = newRole;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          alert('Failed to update role. Please try again.');
+        }
       });
-    } else {
-      (event.target as HTMLSelectElement).value = user.role; // Revert if cancelled
     }
   }
 
@@ -90,7 +99,17 @@ export class AdminUsersComponent implements OnInit {
     }
   }
 
+  /** Returns true if the given user is the currently logged-in admin */
+  isSelf(user: AdminUser): boolean {
+    const me = this.authService.currentUserValue;
+    return me?.userId?.toString() === user.id?.toString();
+  }
+
   promptDelete(user: AdminUser): void {
+    if (this.isSelf(user)) {
+      alert('You cannot deactivate your own admin account.');
+      return;
+    }
     this.deleteTarget = user;
     this.showDeleteDialog = true;
   }

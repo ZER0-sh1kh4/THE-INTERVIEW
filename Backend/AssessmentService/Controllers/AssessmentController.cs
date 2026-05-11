@@ -47,7 +47,7 @@ namespace AssessmentService.Controllers
             var (userId, isPremium, _) = GetUserDetails();
             _logger.LogInformation("Incoming assessment start request for user {UserId} and domain {Domain}", userId, request.Domain);
 
-            // FRESHLY ADDED: pass the full request so question count/difficulty can be honored by the backend.
+            // pass the full request so question count/difficulty can be honored by the backend.
             var response = await _service.StartAssessmentAsync(userId, isPremium, request);
 
             await _rabbitMqPublisher.PublishAsync(QueueNames.AssessmentEvents, new AssessmentStartedEvent

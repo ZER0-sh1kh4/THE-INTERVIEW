@@ -84,6 +84,10 @@ export class InterviewService {
         session.Interview?.id ||
         session.Interview?.Id ||
         interviewId,
+      totalExpected:
+        session.totalExpected ||
+        session.TotalExpected ||
+        questions.length,
       message: session.message || session.Message || 'Interview questions loaded.',
       questions: questions.map((question: any) => ({
         id: question.id ?? question.Id,
@@ -251,6 +255,19 @@ export class InterviewService {
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/warm-up`, request).pipe(
       map(response => this.unwrapData<any>(response))
     );
+  }
+
+  /**
+   * Background fetch: generates remaining questions while the user answers the first batch.
+   * Called automatically by the session component after the initial load.
+   */
+  fetchMoreQuestions(interviewId: number): Observable<BeginInterviewResponse> {
+    return this.http
+      .post<ApiResponse<BeginInterviewResponse>>(`${this.apiUrl}/${interviewId}/fetch-more`, {})
+      .pipe(
+        timeout(90000), // Up to 90s — this runs in background
+        map(response => this.normalizeSession(interviewId, this.unwrapData<any>(response)))
+      );
   }
 
   getInterviewResult(interviewId: number): Observable<InterviewResult> {

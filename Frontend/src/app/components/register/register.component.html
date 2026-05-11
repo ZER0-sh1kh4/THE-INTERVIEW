@@ -60,12 +60,22 @@
 
         <div class="form-group">
           <label class="label-caps uppercase form-label">PASSWORD</label>
-          <input formControlName="password" type="password" class="form-input body-lg" placeholder="••••••••••••" />
+          <div class="password-input-wrapper">
+            <input formControlName="password" [type]="showPassword ? 'text' : 'password'" class="form-input body-lg" placeholder="••••••••••••" />
+            <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()">
+              <span class="material-symbols-outlined">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
         </div>
 
         <div class="form-group">
           <label class="label-caps uppercase form-label">CONFIRM PASSWORD</label>
-          <input formControlName="confirmPassword" type="password" class="form-input body-lg" placeholder="••••••••••••" />
+          <div class="password-input-wrapper">
+            <input formControlName="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" class="form-input body-lg" placeholder="••••••••••••" />
+            <button type="button" class="password-toggle-btn" (click)="toggleConfirmPasswordVisibility()">
+              <span class="material-symbols-outlined">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
           <div *ngIf="registerForm.errors?.['mismatch'] && registerForm.get('confirmPassword')?.touched" class="text-error label-caps mt-2">Passwords do not match</div>
         </div>
 

@@ -1,6 +1,7 @@
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.Events;
 using IdentityService.Data;
+using IdentityService.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -111,6 +112,16 @@ public class SubscriptionEventConsumer : BackgroundService
         }
 
         user.IsPremium = string.Equals(message.Action, "Activate", StringComparison.OrdinalIgnoreCase);
+        dbContext.Notifications.Add(new Notification
+        {
+            UserId = user.Id,
+            Title = user.IsPremium ? "Premium activated" : "Subscription updated",
+            Message = user.IsPremium
+                ? "Your premium plan is active. Premium interviews and results are now unlocked."
+                : "Your premium plan was cancelled. Your account is now on the free plan.",
+            ActionUrl = "/premium",
+            CreatedAt = DateTime.UtcNow
+        });
         await dbContext.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Updated premium state for user {UserId} with action {Action}", message.UserId, message.Action);

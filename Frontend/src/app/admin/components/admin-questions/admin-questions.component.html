@@ -23,6 +23,9 @@
   <div *ngIf="error" class="error-state">{{ error }}</div>
 
   <div *ngIf="!isLoading && !error" class="table-container">
+    <div class="table-summary label-caps">
+      Showing {{ ((currentPage - 1) * pageSize) + 1 }}–{{ currentPage * pageSize > filteredQuestions.length ? filteredQuestions.length : currentPage * pageSize }} of {{ filteredQuestions.length }} questions
+    </div>
     <div class="table-wrap">
       <table class="data-table">
         <thead>
@@ -36,7 +39,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let q of filteredQuestions" class="question-row">
+          <tr *ngFor="let q of paginatedQuestions" class="question-row">
             <td class="id-cell">#Q-{{ q.id }}</td>
             <td class="domain-label">{{ q.domain | uppercase }}</td>
             <td class="question-text">
@@ -55,6 +58,30 @@
       </table>
     </div>
     <p *ngIf="filteredQuestions.length === 0" class="no-data">No questions found in this domain.</p>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-bar" *ngIf="totalPages > 1">
+      <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(1)" title="First">
+        <span class="material-symbols-outlined">first_page</span>
+      </button>
+      <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" title="Previous">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+
+      <button
+        *ngFor="let p of pageNumbers"
+        class="page-btn page-num"
+        [class.page-num--active]="p === currentPage"
+        (click)="goToPage(p)"
+      >{{ p }}</button>
+
+      <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" title="Next">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+      <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(totalPages)" title="Last">
+        <span class="material-symbols-outlined">last_page</span>
+      </button>
+    </div>
   </div>
 </main>
 

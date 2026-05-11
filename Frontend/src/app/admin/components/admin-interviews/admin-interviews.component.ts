@@ -22,6 +22,15 @@ export class AdminInterviewsComponent implements OnInit {
   error = '';
   selectedInterview: AdminInterview | null = null;
 
+  /** Extracts the interview type (Technical/HR/Mixed) from the pipe-delimited domain string.
+   *  Domain format: "role | experience | interviewType | difficulty | N Questions | techStack"
+   */
+  getInterviewType(item: AdminInterview): string {
+    if (!item.domain) return 'Technical';
+    const parts = item.domain.split('|').map(p => p.trim());
+    return parts[2] || 'Technical'; // 3rd segment is the interviewType
+  }
+
   constructor(private adminService: AdminService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -55,7 +64,7 @@ export class AdminInterviewsComponent implements OnInit {
         i.title?.toLowerCase().includes(term) ||
         i.userId?.toString().includes(term);
       const matchesStatus = !this.statusFilter || i.status === this.statusFilter;
-      const matchesType = !this.typeFilter || i.type === this.typeFilter;
+      const matchesType = !this.typeFilter || this.getInterviewType(i) === this.typeFilter;
       return matchesSearch && matchesStatus && matchesType;
     });
   }

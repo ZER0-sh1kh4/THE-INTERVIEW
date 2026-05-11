@@ -44,8 +44,10 @@ export class InterviewStartComponent implements OnInit, OnDestroy {
 
   constructor(private interviewService: InterviewService, private router: Router) {}
 
+  private warmUpFired = false;
+
   ngOnInit(): void {
-    // Warm-up is deferred until the user types a meaningful role name.
+    // Warm-up deferred until user types a role — firing immediately with empty role wastes rate limits.
   }
 
   ngOnDestroy(): void {
@@ -70,26 +72,32 @@ export class InterviewStartComponent implements OnInit, OnDestroy {
 
   /**
    * Sends a warm-up signal to the backend to pre-generate questions.
+   * Only fires ONCE to avoid burning Gemini rate limits.
    */
   private triggerWarmUp() {
-    // Only trigger if role is at least 5 characters — avoids spamming the AI on every keystroke.
+    // Only trigger if role is at least 5 characters and warm-up hasn't already succeeded.
     if (this.form.role.trim().length < 5 || this.form.techStack.length === 0) return;
+    if (this.warmUpFired) return; // Already called — don't spam the API
 
+    this.warmUpFired = true;
     this.warmUpStatus = 'warming';
     this.interviewService.warmUpCache({
       domain: this.buildDomainString(),
       targetCount: 3
     }).subscribe({
       next: () => { this.warmUpStatus = 'ready'; },
-      error: () => { this.warmUpStatus = 'failed'; }
+      error: () => { 
+        this.warmUpStatus = 'failed';
+        this.warmUpFired = false; // Allow one more retry on next config change
+      }
     });
   }
 
-  /** Re-trigger warm-up when form changes with debounce */
+  /** Trigger warm-up on config change with a long debounce (only fires once). */
   onConfigChange() {
     if (this.warmUpTimer) clearTimeout(this.warmUpTimer);
-    // Wait 1.5 seconds after the user stops typing before calling the AI.
-    this.warmUpTimer = setTimeout(() => this.triggerWarmUp(), 1500);
+    // Wait 3 seconds after last change before calling the API.
+    this.warmUpTimer = setTimeout(() => this.triggerWarmUp(), 3000);
   }
 
   /** Adds or removes a technology chip from the selected stack. */
@@ -135,7 +143,7 @@ export class InterviewStartComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.router.navigate(['/interviews', interview.id, 'session']);
+        this.router.navigate(['/interviews', interview.id, 'preflight']);
       },
       error: error => {
         this.isLoading = false;

@@ -111,8 +111,7 @@
       "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5004 } ],
       "UpstreamPathTemplate": "/api/subscriptions/webhook/stripe",
       "UpstreamHttpMethod": [ "POST", "OPTIONS" ],
-      "Priority": 1,
-      "SwaggerKey": "subscriptions"
+      "Priority": 1
     },
     {
       "DownstreamPathTemplate": "/api/subscriptions/{everything}",

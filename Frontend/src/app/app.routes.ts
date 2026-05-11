@@ -6,6 +6,7 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
 import { UserDashboardComponent } from './components/user-dashboard/user-dashboard.component';
 import { InterviewStartComponent } from './components/interviews/interview-start/interview-start.component';
 import { InterviewSessionComponent } from './components/interviews/interview-session/interview-session.component';
+import { InterviewPreflightComponent } from './components/interviews/interview-preflight/interview-preflight.component';
 import { InterviewResultComponent } from './components/interviews/interview-result/interview-result.component';
 import { InterviewHistoryComponent } from './components/interviews/interview-history/interview-history.component';
 import { PremiumComponent } from './components/premium/premium.component';
@@ -39,6 +40,7 @@ export const routes: Routes = [
   { path: 'user-dashboard', component: UserDashboardComponent, canActivate: [authGuard] },
   { path: 'interviews/start', component: InterviewStartComponent, canActivate: [authGuard] },
   { path: 'interviews/history', component: InterviewHistoryComponent, canActivate: [authGuard] },
+  { path: 'interviews/:id/preflight', component: InterviewPreflightComponent, canActivate: [authGuard] },
   { path: 'interviews/:id/session', component: InterviewSessionComponent, canActivate: [authGuard] },
   { path: 'interviews/:id/result', component: InterviewResultComponent, canActivate: [authGuard] },
   { path: 'assessments/domain', component: AssessmentDomainComponent, canActivate: [authGuard] },
@@ -59,4 +61,3 @@ export const routes: Routes = [
 
   { path: '**', redirectTo: '' }
 ];
-

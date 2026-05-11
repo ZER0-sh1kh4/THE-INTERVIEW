@@ -68,7 +68,7 @@
   padding: 1.5rem 0.5rem;
   border-bottom: 1px solid var(--color-outline);
   color: rgba(26, 26, 26, 0.72);
-  font-size: 0.875rem; vertical-align: middle;
+  font-size: 1rem; vertical-align: middle;
 }
 .data-table tr:hover td { color: var(--color-primary); }
 
@@ -92,8 +92,8 @@
 .modal-title { font-family: var(--font-editorial); font-size: 2.25rem; font-style: italic; font-weight: 400; margin: 0 0 1.5rem; }
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
 .detail-item { display: flex; flex-direction: column; }
-.detail-label { font-family: var(--font-body); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.48; margin-bottom: 0.35rem; }
-.detail-value { font-family: var(--font-body); font-size: 0.875rem; }
+.detail-label { font-family: var(--font-body); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.48; margin-bottom: 0.35rem; }
+.detail-value { font-family: var(--font-body); font-size: 1.05rem; }
 .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; }
 .btn-secondary { font-family: var(--font-body); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; min-height: 3.5rem; padding: 0 2rem; display: inline-flex; align-items: center; background: transparent; color: var(--color-primary); border: 1px solid var(--color-primary); cursor: pointer; }
 .btn-secondary:hover { background: rgba(26,26,26,0.04); }

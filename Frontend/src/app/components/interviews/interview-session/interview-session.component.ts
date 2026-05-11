@@ -8,8 +8,8 @@ import { InterviewService } from '../../../services/interview.service';
 
 /**
  * Purpose: Runs the live AI mock interview session.
- * It displays Gemini-generated questions, reads them using TTS, captures speech using STT, and submits transcripts.
- * Enforces fullscreen mode and detects tab/screen switches with anti-cheating warnings.
+ * All questions are displayed on a single scrollable page.
+ * Supports mute/unmute for AI voice, per-question recording, and sidebar submit progress.
  */
 @Component({
   selector: 'app-interview-session',
@@ -21,15 +21,19 @@ import { InterviewService } from '../../../services/interview.service';
 export class InterviewSessionComponent implements OnInit, OnDestroy {
   interviewId = 0;
   questions: InterviewQuestion[] = [];
-  currentQuestionIndex = 0;
+  activeQuestionIndex = 0;
   answers: Record<number, string> = {};
   transcript = '';
-  transcriptStatus = 'Microphone ready. Press Start Recording when you are ready to answer.';
+  transcriptStatus = 'Microphone ready.';
   recognitionSupported = false;
 
   isLoading = true;
   isRecording = false;
   isSpeaking = false;
+  isSpeakingIndex = -1;
+  isMuted = false;
+  isSubmitting = false;
+  submitProgressMsg = 'Submitting responses...';
   errorMsg = '';
   submitMsg = '';
   resultSummary = '';
@@ -77,8 +81,9 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
             try { this.answers = JSON.parse(savedAnswers); } catch { /* ignore corrupt data */ }
           }
           this.isLoading = false;
-          this.loadCurrentTranscript();
-          setTimeout(() => this.speakCurrentQuestion(), 500);
+          if (!this.isMuted) {
+            setTimeout(() => this.speakQuestion(0), 500);
+          }
           this.enterFullscreen();
           this.setupVisibilityDetection();
           return;
@@ -93,7 +98,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     this.setupVisibilityDetection();
   }
 
-  /** Calls the backend for session questions and guarantees the loading state eventually clears. */
+  /** Calls the backend for session questions and triggers background fetch for remaining. */
   loadQuestions(): void {
     this.isLoading = true;
     this.errorMsg = '';
@@ -110,22 +115,27 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       next: session => {
         this.zone.run(() => {
           this.questions = session.questions || [];
+          const totalExpected = session.totalExpected || this.questions.length;
+
           // Cache to sessionStorage for refresh resilience
           if (this.questions.length > 0) {
             sessionStorage.setItem(`interview_questions_${this.interviewId}`, JSON.stringify(this.questions));
           }
-          this.loadCurrentTranscript();
-          if (this.questions.length > 0) {
-            setTimeout(() => this.speakCurrentQuestion(), 500);
-          } else {
+          if (this.questions.length > 0 && !this.isMuted) {
+            setTimeout(() => this.speakQuestion(0), 500);
+          } else if (this.questions.length === 0) {
             this.errorMsg = 'Gemini did not return questions for this attempt. Click Generate Questions Again in a moment.';
           }
+
+          // LAZY LOADING: If we don't have all questions yet, fetch the rest in background
+          if (this.questions.length < totalExpected) {
+            this.fetchRemainingQuestions();
+          }
+
           this.cdr.detectChanges();
         });
       },
       error: error => {
-        // Safe fallback: if POST /begin timed out but succeeded in the background,
-        // GET /interviews/{id} will retrieve the already-saved questions.
         this.interviewService.getInterview(this.interviewId).subscribe({
           next: fallbackSession => {
             this.zone.run(() => {
@@ -133,8 +143,13 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
               if (this.questions.length > 0) {
                 sessionStorage.setItem(`interview_questions_${this.interviewId}`, JSON.stringify(this.questions));
                 this.isLoading = false;
-                this.loadCurrentTranscript();
-                setTimeout(() => this.speakCurrentQuestion(), 500);
+                if (!this.isMuted) {
+                  setTimeout(() => this.speakQuestion(0), 500);
+                }
+                const totalExpected = fallbackSession.totalExpected || this.questions.length;
+                if (this.questions.length < totalExpected) {
+                  this.fetchRemainingQuestions();
+                }
               } else {
                 this.errorMsg = error?.error?.message || 'Gemini question generation timed out. Click Generate Questions Again.';
               }
@@ -152,6 +167,24 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Silently fetches remaining questions in the background while the user answers the first batch. */
+  private fetchRemainingQuestions(): void {
+    this.interviewService.fetchMoreQuestions(this.interviewId).subscribe({
+      next: session => {
+        this.zone.run(() => {
+          if (session.questions && session.questions.length > this.questions.length) {
+            this.questions = session.questions;
+            sessionStorage.setItem(`interview_questions_${this.interviewId}`, JSON.stringify(this.questions));
+          }
+          this.cdr.detectChanges();
+        });
+      },
+      error: err => {
+        console.warn('Background fetch-more failed:', err);
+      }
+    });
+  }
+
   /** Stops voice APIs and cleans up fullscreen/visibility listeners when the component is destroyed. */
   ngOnDestroy(): void {
     this.stopRecording();
@@ -159,6 +192,102 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     window.speechSynthesis?.cancel();
     this.removeVisibilityDetection();
     this.exitFullscreen();
+  }
+
+  // ─── Mute/Unmute ───────────────────────────────────────────────────────
+
+  /** Toggles mute state for AI voice. Stops any current speech if muting. */
+  toggleMute(): void {
+    this.isMuted = !this.isMuted;
+    if (this.isMuted) {
+      window.speechSynthesis?.cancel();
+      this.isSpeaking = false;
+      this.isSpeakingIndex = -1;
+    }
+    this.cdr.detectChanges();
+  }
+
+  // ─── Single-Page Q&A Helpers ───────────────────────────────────────────
+
+  nextQuestion(): void {
+    if (this.activeQuestionIndex < this.questions.length - 1) {
+      window.speechSynthesis?.cancel();
+      this.isSpeaking = false;
+      this.isSpeakingIndex = -1;
+      this.activeQuestionIndex++;
+      this.cdr.detectChanges();
+      
+      // Auto-speak the new question
+      setTimeout(() => this.speakQuestion(this.activeQuestionIndex), 100);
+    }
+  }
+
+  previousQuestion(): void {
+    if (this.activeQuestionIndex > 0) {
+      window.speechSynthesis?.cancel();
+      this.isSpeaking = false;
+      this.isSpeakingIndex = -1;
+      this.activeQuestionIndex--;
+      this.cdr.detectChanges();
+      
+      // Auto-speak the new question
+      setTimeout(() => this.speakQuestion(this.activeQuestionIndex), 100);
+    }
+  }
+
+  /** Sets the active question index (used when focusing a textarea). */
+  setActiveQuestion(index: number): void {
+    if (this.activeQuestionIndex !== index) {
+      window.speechSynthesis?.cancel();
+      this.isSpeaking = false;
+      this.isSpeakingIndex = -1;
+    }
+    this.activeQuestionIndex = index;
+    this.cdr.detectChanges();
+  }
+
+  /** Called by the template when a user types in any question's textarea. */
+  onAnswerChange(questionId: number, value: string): void {
+    this.answers[questionId] = value;
+    sessionStorage.setItem(`interview_answers_${this.interviewId}`, JSON.stringify(this.answers));
+  }
+
+  /** Returns word count for a given question ID. */
+  getWordCount(questionId: number): number {
+    const text = (this.answers[questionId] || '').trim();
+    return text ? text.split(/\s+/).length : 0;
+  }
+
+  /** Overall progress based on answered questions. */
+  get overallProgress(): number {
+    if (!this.questions.length) return 0;
+    return (this.answeredCount / this.questions.length) * 100;
+  }
+
+  /** Count of answered questions. */
+  get answeredCount(): number {
+    return this.questions.filter(q => (this.answers[q.id] || '').trim()).length;
+  }
+
+  get missingQuestionNumbers(): number[] {
+    return this.questions
+      .filter(q => !(this.answers[q.id] || '').trim())
+      .map((q, _, arr) => this.questions.indexOf(q) + 1);
+  }
+
+  /** Scrolls to a question block from the sidebar navigator. */
+  scrollToQuestion(index: number): void {
+    if (this.activeQuestionIndex !== index) {
+      window.speechSynthesis?.cancel();
+      this.isSpeaking = false;
+      this.isSpeakingIndex = -1;
+    }
+    this.activeQuestionIndex = index;
+    const el = document.getElementById('q-' + index);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    this.cdr.detectChanges();
   }
 
   // ─── Fullscreen Management ───────────────────────────────────────────────
@@ -171,9 +300,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       || (docEl as any).msRequestFullscreen;
 
     if (requestFs) {
-      requestFs.call(docEl).catch(() => {
-        // Fullscreen may be blocked by browser policy; proceed anyway.
-      });
+      requestFs.call(docEl).catch(() => {});
     }
   }
 
@@ -188,7 +315,6 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
   @HostListener('document:fullscreenchange')
   onFullscreenChange(): void {
     if (!document.fullscreenElement && this.questions.length > 0 && !this.isAutoSubmitting && !this.submitMsg) {
-      // User tried to exit fullscreen during interview — re-enter.
       setTimeout(() => this.enterFullscreen(), 200);
     }
   }
@@ -250,8 +376,6 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     if (this.isAutoSubmitting) return;
     this.isAutoSubmitting = true;
 
-    this.commitPendingTranscript();
-    this.saveCurrentAnswer();
     this.stopRecording();
 
     const payload = {
@@ -259,7 +383,8 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       answers: this.buildSubmitAnswers()
     };
 
-    this.submitMsg = 'Auto-submitting interview due to policy violation...';
+    this.isSubmitting = true;
+    this.submitProgressMsg = 'Auto-submitting due to policy violation...';
     this.errorMsg = '';
     this.cdr.detectChanges();
 
@@ -274,42 +399,56 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
         }, 1200);
       },
       error: () => {
-        // Even on error, redirect to result page.
         this.exitFullscreen();
         this.router.navigate(['/interviews', this.interviewId, 'result']);
       }
     });
   }
 
-  // ─── Core Session Logic (unchanged) ──────────────────────────────────────
+  // ─── Speech TTS ──────────────────────────────────────────────────────────
 
-  /** Current question convenience getter for the template. */
-  get currentQuestion(): InterviewQuestion | null {
-    return this.questions[this.currentQuestionIndex] || null;
-  }
+  /** Reads a specific question aloud using browser text-to-speech. Respects mute state. */
+  speakQuestion(index: number): void {
+    if (this.isMuted || !window.speechSynthesis) return;
 
-  /** Progress percentage used by the top progress bar. */
-  get progressPercent(): number {
-    if (!this.questions.length) {
-      return 0;
+    // Toggle behavior: if already speaking THIS question, stop it.
+    if (this.isSpeaking && this.isSpeakingIndex === index) {
+      window.speechSynthesis.cancel();
+      this.isSpeaking = false;
+      this.isSpeakingIndex = -1;
+      return;
     }
 
-    return ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+    const question = this.questions[index];
+    if (!question) return;
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(question.text);
+    utterance.rate = 0.92;
+    utterance.pitch = 1;
+    utterance.onstart = () => this.zone.run(() => { this.isSpeaking = true; this.isSpeakingIndex = index; });
+    utterance.onend = () => this.zone.run(() => { this.isSpeaking = false; this.isSpeakingIndex = -1; });
+    utterance.onerror = () => this.zone.run(() => { this.isSpeaking = false; this.isSpeakingIndex = -1; });
+    window.speechSynthesis.speak(utterance);
   }
 
-  get canSubmit(): boolean {
-    return this.questions.length > 0;
+  // Keep old method name working for backward compatibility
+  speakCurrentQuestion(): void {
+    this.speakQuestion(this.activeQuestionIndex);
   }
 
-  get missingQuestionNumbers(): number[] {
-    return this.questions
-      .filter(q => !(this.answers[q.id] || '').trim())
-      .map(q => q.orderIndex || q.id);
-  }
+  // ─── Speech STT (Recording) ──────────────────────────────────────────────
 
-  /** Word count for the live transcription panel. */
-  get wordCount(): number {
-    return this.transcript.trim() ? this.transcript.trim().split(/\s+/).length : 0;
+  /** Toggles recording for a specific question. */
+  toggleRecordingFor(index: number): void {
+    // If recording a different question, stop first
+    if (this.isRecording && this.activeQuestionIndex !== index) {
+      this.stopRecording();
+    }
+
+    this.activeQuestionIndex = index;
+    this.transcript = this.answers[this.questions[index]?.id] || '';
+    this.toggleRecording();
   }
 
   /** Initializes browser speech recognition when supported. */
@@ -332,7 +471,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       this.zone.run(() => {
         this.isRecording = true;
         this.manuallyStopping = false;
-        this.transcriptStatus = 'Listening continuously. Speak naturally; the transcript updates live.';
+        this.transcriptStatus = 'Listening continuously.';
         this.pendingTranscript = this.transcript;
         this.cdr.detectChanges();
       });
@@ -354,8 +493,12 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       this.zone.run(() => {
         this.pendingTranscript = `${finalText}${interimText}`.trim();
         this.transcript = this.pendingTranscript;
-        this.saveCurrentAnswer();
-        this.transcriptStatus = interimText ? 'Listening continuously. Live transcript is updating.' : 'Listening continuously. Transcript saved so far.';
+        // Save to the active question
+        const activeQ = this.questions[this.activeQuestionIndex];
+        if (activeQ) {
+          this.answers[activeQ.id] = this.transcript;
+          sessionStorage.setItem(`interview_answers_${this.interviewId}`, JSON.stringify(this.answers));
+        }
         this.cdr.detectChanges();
       });
     };
@@ -384,7 +527,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
 
         if (this.shouldKeepRecording && !this.manuallyStopping) {
           this.isRecording = false;
-          this.transcriptStatus = 'Listening paused briefly... reconnecting.';
+          this.transcriptStatus = 'Reconnecting...';
           this.cdr.detectChanges();
           this.restartRecognition(180);
           return;
@@ -400,27 +543,10 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     };
   }
 
-  /** Reads the current AI question aloud using browser text-to-speech. */
-  speakCurrentQuestion(): void {
-    if (!this.currentQuestion || !window.speechSynthesis) {
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(this.currentQuestion.text);
-    utterance.rate = 0.92;
-    utterance.pitch = 1;
-    utterance.onstart = () => this.zone.run(() => (this.isSpeaking = true));
-    utterance.onend = () => this.zone.run(() => (this.isSpeaking = false));
-    utterance.onerror = () => this.zone.run(() => (this.isSpeaking = false));
-    window.speechSynthesis.speak(utterance);
-  }
-
   /** Starts or stops live speech-to-text recording. */
   async toggleRecording(): Promise<void> {
     if (!this.recognitionSupported || !this.recognition) {
       this.errorMsg = 'Speech-to-text is not supported in this browser. Please type your answer.';
-      this.transcriptStatus = 'Microphone unavailable in this browser.';
       this.cdr.detectChanges();
       return;
     }
@@ -449,7 +575,6 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       this.isRecording = false;
       this.shouldKeepRecording = false;
       this.errorMsg = error?.message || 'Unable to start microphone recording.';
-      this.transcriptStatus = 'Unable to start recording. You can type your answer manually.';
       this.clearStopFallback();
       this.releaseMicrophone();
       this.cdr.detectChanges();
@@ -498,73 +623,10 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Jumps to a specific question from the right sidebar navigator. */
-  goToQuestion(index: number): void {
-    if (index < 0 || index >= this.questions.length || index === this.currentQuestionIndex) {
-      return;
-    }
+  // ─── Submit ─────────────────────────────────────────────────────────────
 
-    this.saveCurrentAnswer();
-    this.stopRecording();
-    this.currentQuestionIndex = index;
-    this.loadCurrentTranscript();
-    this.speakCurrentQuestion();
-    this.cdr.detectChanges();
-  }
-
-  /** Requests microphone permission without starting the transcript engine. */
-  async checkMicrophoneAccess(): Promise<void> {
-    this.errorMsg = '';
-    this.transcriptStatus = 'Checking microphone permission...';
-    this.cdr.detectChanges();
-
-    const hasAccess = await this.ensureMicrophoneAccess();
-    if (hasAccess) {
-      this.transcriptStatus = 'Microphone access granted. Press Start Recording to begin.';
-      this.releaseMicrophone();
-      this.cdr.detectChanges();
-    }
-  }
-
-  /** Saves the current textarea/transcript as the answer for the active question and persists to sessionStorage. */
-  saveCurrentAnswer(): void {
-    if (!this.currentQuestion) {
-      return;
-    }
-
-    this.answers[this.currentQuestion.id] = this.transcript;
-    // Persist answers to sessionStorage so they survive refresh/crash
-    sessionStorage.setItem(`interview_answers_${this.interviewId}`, JSON.stringify(this.answers));
-  }
-
-  /** Loads a previously saved answer when moving between questions. */
-  private loadCurrentTranscript(): void {
-    this.transcript = this.currentQuestion ? this.answers[this.currentQuestion.id] || '' : '';
-    this.pendingTranscript = this.transcript;
-  }
-
-  /** Moves to the previous question after saving the current transcript. */
-  previousQuestion(): void {
-    this.saveCurrentAnswer();
-    this.stopRecording();
-    if (this.currentQuestionIndex > 0) {
-      this.currentQuestionIndex--;
-      this.loadCurrentTranscript();
-      this.speakCurrentQuestion();
-      this.cdr.detectChanges();
-    }
-  }
-
-  /** Moves to the next question after saving the current transcript. */
-  nextQuestion(): void {
-    this.saveCurrentAnswer();
-    this.stopRecording();
-    if (this.currentQuestionIndex < this.questions.length - 1) {
-      this.currentQuestionIndex++;
-      this.loadCurrentTranscript();
-      this.speakCurrentQuestion();
-      this.cdr.detectChanges();
-    }
+  get canSubmit(): boolean {
+    return this.questions.length > 0;
   }
 
   /** Builds the backend submit payload from saved transcripts. */
@@ -578,18 +640,18 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
   /** Submits every answer to the backend for persistence and scoring. */
   submitInterview(): void {
     this.commitPendingTranscript();
-    this.saveCurrentAnswer();
     if (!this.canSubmit) {
       this.errorMsg = 'Cannot submit: no questions loaded.';
       return;
     }
 
     this.stopRecording();
-    this.submitMsg = 'Submitting responses...';
+    this.isSubmitting = true;
+    this.submitProgressMsg = 'Submitting responses...';
     this.errorMsg = '';
     this.cdr.detectChanges();
 
-    // Live progress updates so the user knows the app isn't frozen
+    // Live progress updates shown in the sidebar
     let elapsed = 0;
     const progressMessages = [
       'Submitting responses...',
@@ -597,12 +659,12 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       'Scoring question batch 1...',
       'Scoring question batch 2...',
       'Almost done — finalizing results...',
-      'Still processing — this can take up to a minute for longer interviews...',
+      'Still processing — this can take up to a minute...',
     ];
     const progressInterval = setInterval(() => {
       elapsed++;
       const msgIndex = Math.min(elapsed, progressMessages.length - 1);
-      this.submitMsg = progressMessages[msgIndex];
+      this.submitProgressMsg = progressMessages[msgIndex];
       this.cdr.detectChanges();
     }, 5000);
 
@@ -614,8 +676,8 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
         clearInterval(progressInterval);
         sessionStorage.removeItem(`interview_questions_${this.interviewId}`);
         sessionStorage.removeItem(`interview_answers_${this.interviewId}`);
-        this.submitMsg = 'Interview submitted successfully.';
-        this.resultSummary = `Grade ${result.grade} - ${result.percentage.toFixed(0)}%`;
+        this.submitProgressMsg = `Done! Grade ${result.grade} — ${result.percentage.toFixed(0)}%`;
+        this.submitMsg = 'submitted';
         this.cdr.detectChanges();
         setTimeout(() => {
           this.exitFullscreen();
@@ -624,7 +686,8 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       },
       error: error => {
         clearInterval(progressInterval);
-        this.submitMsg = '';
+        this.isSubmitting = false;
+        this.submitProgressMsg = '';
         this.errorMsg = error?.error?.message || 'Unable to submit interview. Please try again.';
         this.cdr.detectChanges();
       }
@@ -638,10 +701,11 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     this.router.navigate(['/user-dashboard']);
   }
 
+  // ─── Private Helpers ────────────────────────────────────────────────────
+
   private async ensureMicrophoneAccess(): Promise<boolean> {
     if (!navigator.mediaDevices?.getUserMedia) {
       this.errorMsg = 'Microphone access is not available in this browser.';
-      this.transcriptStatus = 'Microphone API unavailable.';
       this.cdr.detectChanges();
       return false;
     }
@@ -652,7 +716,6 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       return true;
     } catch {
       this.errorMsg = 'Microphone permission was blocked. Please allow microphone access and try again.';
-      this.transcriptStatus = 'Microphone permission blocked.';
       this.cdr.detectChanges();
       return false;
     }
@@ -664,12 +727,14 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
   }
 
   private commitPendingTranscript(): void {
-    if (!this.pendingTranscript || !this.currentQuestion) {
-      return;
-    }
+    if (!this.pendingTranscript) return;
 
     this.transcript = this.pendingTranscript;
-    this.saveCurrentAnswer();
+    const activeQ = this.questions[this.activeQuestionIndex];
+    if (activeQ) {
+      this.answers[activeQ.id] = this.transcript;
+      sessionStorage.setItem(`interview_answers_${this.interviewId}`, JSON.stringify(this.answers));
+    }
   }
 
   private clearStopFallback(): void {
@@ -690,7 +755,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
         this.recognition.start();
       } catch {
         this.isRecording = false;
-        this.transcriptStatus = 'Listening paused. Tap Start Recording to continue.';
+        this.transcriptStatus = 'Listening paused. Tap Record to continue.';
         this.cdr.detectChanges();
       }
     };

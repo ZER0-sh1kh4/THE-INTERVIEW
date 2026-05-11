@@ -22,6 +22,39 @@ namespace IdentityService.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("IdentityService.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActionUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("IdentityService.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -68,7 +101,7 @@ namespace IdentityService.Migrations
                             FullName = "Shikha Gangwar",
                             IsActive = true,
                             IsPremium = true,
-                            PasswordHash = "$2a$11$WTKa3dxfgRfxVciv1/IuTOD3DIvrmNuJEDFTlMLecFe8qDqp3n5RW",
+                            PasswordHash = "$2a$11$I..PYZK8xDB0tM/ORuQSfeOv6OkYV3xDMg5CT8mLCAeulJdsGVWq2",
                             Role = "Admin"
                         },
                         new
@@ -79,7 +112,7 @@ namespace IdentityService.Migrations
                             FullName = "Cyber Shuu",
                             IsActive = true,
                             IsPremium = false,
-                            PasswordHash = "$2a$11$14hhs0mbyR826DL3zEHFAeTpVRhq3m3GPEw3cJbT0aJ0fZhfjbKaW",
+                            PasswordHash = "$2a$11$4X/.HFgjhlv1c5V3xcy61uRdgHoBqH3z8ZDNosApcj.ejSI9B5tW2",
                             Role = "Candidate"
                         });
                 });

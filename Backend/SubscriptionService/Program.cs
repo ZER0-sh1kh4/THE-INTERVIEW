@@ -48,7 +48,6 @@ builder.Services.AddSwaggerGen(c =>
             new List<string>()
         }
     });
-    c.OperationFilter<AuthorizeOperationFilter>();
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -84,7 +83,10 @@ var app = builder.Build();
 
 app.UseGlobalExceptionHandling();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 if (app.Environment.IsDevelopment())
 {

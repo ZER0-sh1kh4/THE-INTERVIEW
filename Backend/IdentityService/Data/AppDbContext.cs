@@ -9,6 +9,7 @@ namespace IdentityService.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -20,7 +21,7 @@ namespace IdentityService.Data
                     Id = 1,
                     FullName = "Shikha Gangwar",
                     Email = "sh1kh4g@gmail.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Shikha@123"),
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Shikha@123"),//do not use this password in production, it's just for testing purposes
                     Role = "Admin",
                     IsPremium = true,
                     IsActive = true,

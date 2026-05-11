@@ -132,6 +132,115 @@
   color: #1a1a1a;
 }
 
+/* ── Notifications ── */
+.notification-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.notification-bell {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  color: var(--color-primary);
+  transition: opacity 0.2s;
+}
+
+.notification-bell:hover {
+  opacity: 0.7;
+}
+
+.notification-bell .material-symbols-outlined {
+  font-size: 1.5rem;
+}
+
+.unread-indicator {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #dc2626;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-background);
+}
+
+.notification-panel {
+  position: absolute;
+  top: calc(100% + 1.25rem);
+  right: -2rem;
+  width: 22rem;
+  background: var(--color-background);
+  border: 1px solid var(--color-outline);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+  z-index: 100;
+  max-height: 28rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-outline);
+  background: rgba(26,26,26,0.02);
+}
+
+.panel-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.notification-item {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--color-outline);
+  cursor: default;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: rgba(26,26,26,0.02);
+}
+
+.notification-item.unread {
+  background: rgba(212, 175, 55, 0.04);
+}
+
+.note-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.note-message {
+  font-size: 0.85rem;
+  color: rgba(26,26,26,0.7);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.note-time {
+  font-size: 0.7rem;
+  opacity: 0.4;
+  text-transform: uppercase;
+}
+
+.no-notifications {
+  padding: 3rem 1rem;
+  text-align: center;
+  font-style: italic;
+  color: rgba(26,26,26,0.4);
+}
+
+.notification-item.clickable {
+  cursor: pointer;
+}
+
 @media (max-width: 1080px) {
   .dashboard-nav {
     align-items: flex-start;
@@ -147,6 +256,12 @@
   .account-block {
     width: 100%;
     justify-content: space-between;
+  }
+  
+  .notification-panel {
+    right: 0;
+    width: calc(100vw - 2rem);
+    max-width: 22rem;
   }
 }
 
