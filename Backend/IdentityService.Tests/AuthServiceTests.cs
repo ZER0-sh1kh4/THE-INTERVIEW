@@ -42,7 +42,7 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task RegisterAsync_ExistingEmail_UpdatesExistingUser()
+    public async Task RegisterAsync_ExistingEmail_ThrowsAppException()
     {
         await using var context = CreateContext();
         var existing = new User
@@ -50,26 +50,24 @@ public class AuthServiceTests
             FullName = "Old Name",
             Email = "existing@test.com",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("Old@123"),
-            IsActive = false
+            IsActive = true
         };
 
         context.Users.Add(existing);
         await context.SaveChangesAsync();
 
         var service = CreateService(context);
-        var response = await service.RegisterAsync(new RegisterRequest
+        
+        var act = () => service.RegisterAsync(new RegisterRequest
         {
-            FullName = "Updated Name",
+            FullName = "New Name",
             Email = existing.Email,
             Password = "New@12345"
         });
 
-        response.Message.Should().Be("Existing user updated successfully");
-
-        var updatedUser = await context.Users.SingleAsync(x => x.Email == existing.Email);
-        updatedUser.FullName.Should().Be("Updated Name");
-        updatedUser.IsActive.Should().BeTrue();
-        BCrypt.Net.BCrypt.Verify("New@12345", updatedUser.PasswordHash).Should().BeTrue();
+        var exception = await act.Should().ThrowAsync<BuildingBlocks.Exceptions.AppException>();
+        exception.Which.StatusCode.Should().Be(400);
+        exception.Which.Message.Should().Be("Email already exists.");
     }
 
     [Fact]

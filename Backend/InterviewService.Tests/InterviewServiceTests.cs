@@ -162,7 +162,7 @@ public class InterviewServiceTests
                 .GetString() ?? string.Empty;
 
             var text = prompt.Contains("Score each answer", StringComparison.OrdinalIgnoreCase)
-                ? BuildEvaluationJson()
+                ? BuildEvaluationJson(prompt)
                 : BuildQuestionJson();
 
             var responseBody = JsonSerializer.Serialize(new
@@ -187,21 +187,37 @@ public class InterviewServiceTests
 
         private static string BuildQuestionJson()
         {
-            var questions = Enumerable.Range(1, 5).Select(index => new
+            var questionsList = Enumerable.Range(1, 5).Select(index => new
             {
-                text = $"How would you handle a production C# service scenario number {index} where latency rises and users report intermittent failures?",
-                questionType = "Subjective",
+                question = $"How would you handle a production C# service scenario number {index} where latency rises and users report intermittent failures?",
                 idealAnswer = "A strong answer should discuss investigation, metrics, trade-offs, rollout safety, and prevention.",
-                evaluationCriteria = "Score clarity, practical debugging, production reasoning, and trade-off awareness.",
                 subtopic = "Production Debugging"
             });
 
-            return JsonSerializer.Serialize(questions);
+            return JsonSerializer.Serialize(new { questions = questionsList });
         }
 
-        private static string BuildEvaluationJson()
+        private static string BuildEvaluationJson(string prompt)
         {
-            var evaluations = Enumerable.Range(1, 5).Select(index => new
+            var ids = new HashSet<int>();
+            var dataIndex = prompt.IndexOf("Interview data:");
+            if (dataIndex > -1)
+            {
+                var matches = System.Text.RegularExpressions.Regex.Matches(prompt.Substring(dataIndex), @"""questionId""\s*:\s*(\d+)");
+                foreach (System.Text.RegularExpressions.Match match in matches)
+                {
+                    if (int.TryParse(match.Groups[1].Value, out var id))
+                    {
+                        ids.Add(id);
+                    }
+                }
+            }
+            if (!ids.Any()) 
+            {
+                ids.Add(1); ids.Add(2); ids.Add(3); ids.Add(4); ids.Add(5);
+            }
+
+            var evaluations = ids.Select(index => new
             {
                 questionId = index,
                 score = 8,
